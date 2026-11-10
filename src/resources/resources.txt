@@ -1,0 +1,11 @@
+# The resources of the game: the version of Road Rash for Windows 95, stored byte for byte in the .bin files beside this one (version: FileDescription "Open Rash"),
+# and the Open Rash icon (icon_*.bin = PNG images, icongroup_102.bin; drawn by the local script analysis\make_icon.ps1).
+# Built into analysis\build\resources.res by scripts\make_res.ps1.   type: 3 icon, 14 icon group, 16 version;  lang 1033 = US English
+# type  id  lang  file
+3     1    1033  icon_1.bin
+3     2    1033  icon_2.bin
+3     3    1033  icon_3.bin
+3     4    1033  icon_4.bin
+3     5    1033  icon_5.bin
+14    102  1033  icongroup_102.bin
+16    1    1033  version_1.bin

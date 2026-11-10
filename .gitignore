@@ -1,0 +1,46 @@
+# Open Rash - tracked: the source (incl. the original program's data tables src\runtime\game_data.c and resources src\resources\, so it builds on its own),
+# build scripts (scripts\) and small tools. The game's content (graphics, sound, music, courses) stays local: supply your own copy of the game in data\.
+
+# ---- Original game and its derived output ----------------------------------
+/data/
+/release/
+# machine-converted C (old, now empty)
+/src/auto/
+# screenshots (P key in the game), video captures
+/screenshots/
+/recordings/
+*.mp4
+*.bmp
+*.png
+# README screenshots
+!/docs/screenshots/*.png
+
+# ---- Build output -----------------------------------------------------------
+*.exe
+*.dll
+*.lib
+*.exp
+*.obj
+*.pdb
+*.ilk
+*.res
+*.log
+*.err
+__pycache__/
+
+# ---- analysis\: local only - test / debugging scripts, notes, goldens, build output (analysis\build) ----
+/analysis/
+# third-party SDKs unpacked locally (SDL3: deps\SDL3-3.4.20, see readme.md)
+/deps/
+
+# ---- Local / machine-specific -----------------------------------------------
+/backup/
+/RoadRash.cfg
+/.claude/
+/.vscode/
+Thumbs.db
+desktop.ini
+
+# working notes (local only, user)
+/RESUME.md
+/CLAUDE.md

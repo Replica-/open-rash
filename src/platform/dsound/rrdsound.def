@@ -1,0 +1,10 @@
+LIBRARY dsound
+EXPORTS
+DirectSoundCreate @1
+RR_MusicPlay=_RR_MusicPlay@8 @100
+RR_MusicStop=_RR_MusicStop@0 @101
+RR_MusicPause=_RR_MusicPause@0 @102
+RR_MusicResume=_RR_MusicResume@0 @103
+RR_SndStep=_RR_SndStep@0 @104
+RR_MusicState=_RR_MusicState@0 @105
+RR_SetMixTable=_RR_SetMixTable@4 @106
