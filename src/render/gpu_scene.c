@@ -29,7 +29,7 @@ static void (__stdcall *g_gpuBegin)(unsigned char *, int, int, int, const int *)
 /* start of every race (rr_RaceSetup), after the shim chose the frame width */
 void rr_GpuRaceBegin(void)
 {
-    HMODULE sh = GetModuleHandleA("ddraw.dll");
+    HMODULE sh = GetModuleHandleA("rrddraw.dll");
     int (__stdcall *on)(void) = sh ? (int (__stdcall *)(void))GetProcAddress(sh, "RR_GpuRace") : 0;
     g_gpuQuad = sh ? (void (__stdcall *)(const RrGpuQuad *))GetProcAddress(sh, "RR_GpuQuad") : 0;
     g_gpuBegin = sh ? (void (__stdcall *)(unsigned char *, int, int, int, const int *))GetProcAddress(sh, "RR_GpuSceneBegin") : 0;

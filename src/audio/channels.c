@@ -116,7 +116,7 @@ void __fastcall rr_SoundSettingsRead(HKEY key)
     /* default Game music (channel 4) 40 % (user, 2026-11-09; the original had 80 for every channel but Master); a saved
        mix still wins.  The dsound shim scales the songs / video soundtracks by Master x Game music from this table (RR_SetMixTable) */
     *(int *)((unsigned char *)&(*(char *)&g_mixer.g_mixChannels) + 4 * 24 + 16) = 40;
-    { HMODULE ds = GetModuleHandleA("dsound.dll"); void (__stdcall *mt)(const void *) = ds ? (void (__stdcall *)(const void *))GetProcAddress(ds, "RR_SetMixTable") : 0; if (mt) mt(&(*(char *)&g_mixer.g_mixChannels)); }
+    { HMODULE ds = GetModuleHandleA("rrdsound.dll"); void (__stdcall *mt)(const void *) = ds ? (void (__stdcall *)(const void *))GetProcAddress(ds, "RR_SetMixTable") : 0; if (mt) mt(&(*(char *)&g_mixer.g_mixChannels)); }
     if (RegQueryValueExA(key, &s_Mixer, NULL, NULL, buf, &size) == 0) {
         unsigned char *src = buf + 8;
         unsigned char *dst = (unsigned char *)&(*(char *)&g_mixer.g_mixChannels);

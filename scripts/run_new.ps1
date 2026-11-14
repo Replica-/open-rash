@@ -1,4 +1,4 @@
-# Run the LATEST build (analysis\build\OpenRash.exe + build\sdl\ddraw.dll, SDL3.dll, dsound.dll) as a normal window with the real data folder as working directory (data\ holds everything: the game files, VIDEO_UP / VIDEO, AUDIO\Music songs and the mod\widescreen art mod). Not for tests (they use rrtest.ps1).
+# Run the LATEST build (analysis\build\OpenRash.exe + build\sdl\rrddraw.dll, SDL3.dll, rrdsound.dll) as a normal window with the real data folder as working directory (data\ holds everything: the game files, VIDEO_UP / VIDEO, AUDIO\Music songs and the mod\widescreen art mod). Not for tests (they use rrtest.ps1).
 # -Renderer gpu|soft = force the renderer for this run (RR_RENDERER; default: Video Options); -World3D on|off = force the true-3D world of GPU races (RR_WORLD3D; default: Video Options)
 # -Cop "<tick>,<dist>" = police test (RR_COP); -Cash <n> = a fresh Big Game starts with $n (RR_CASH); -RacePct <1..99> = races end after that % of their length (RR_RACE_PCT);
 # -Track <1..5> = straight into a race on that track, no menus (RR_AUTORACE; 1 City 2 Sierra 3 Peninsula 4 Napa 5 Pacific Highway); -SkipTo <segment> = fast-forward that
@@ -19,7 +19,7 @@ Get-Process OpenRash -ErrorAction SilentlyContinue | Where-Object { $_.Path -lik
 Start-Sleep -Milliseconds 300
 Copy-Item "$a\build\OpenRash.exe" "$play\OpenRash.exe" -Force
 if(Test-Path "$a\build\OpenRash.map"){ Copy-Item "$a\build\OpenRash.map" "$play\OpenRash.map" -Force }
-foreach($f in "ddraw.dll","SDL3.dll","dsound.dll"){ if(Test-Path "$a\build\sdl\$f"){ Copy-Item "$a\build\sdl\$f" $play -Force } else { "missing $a\build\sdl\$f (run the Build entry)" } }
+foreach($f in "rrddraw.dll","SDL3.dll","rrdsound.dll"){ if(Test-Path "$a\build\sdl\$f"){ Copy-Item "$a\build\sdl\$f" $play -Force } else { "missing $a\build\sdl\$f (run the Build entry)" } }
 $psi = New-Object Diagnostics.ProcessStartInfo "$play\OpenRash.exe"
 $psi.WorkingDirectory = $data; $psi.UseShellExecute = $false
 $e = $psi.EnvironmentVariables

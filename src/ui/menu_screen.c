@@ -136,7 +136,7 @@ void __fastcall rr_MenuScreenShow(int screen)
         s = (*(int *)&rec_menuScreen.g_menuScreen);
     {   /* tell the shim which screen is up (musicbox.inc: no songs on the credits splash, screen 7) */
         static void (__stdcall *note)(int); static int looked;
-        if (!looked) { HMODULE m = GetModuleHandleA("ddraw.dll"); looked = 1; if (m) note = (void (__stdcall *)(int))GetProcAddress(m, "RR_MenuScreen"); }
+        if (!looked) { HMODULE m = GetModuleHandleA("rrddraw.dll"); looked = 1; if (m) note = (void (__stdcall *)(int))GetProcAddress(m, "RR_MenuScreen"); }
         if (note) note(s);
     }
     switch (s) {

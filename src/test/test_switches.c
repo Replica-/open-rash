@@ -14,8 +14,8 @@ void rr_TestTick(void)
     if (!init) {
         char b[16];
         init = 1;
-        { void (__stdcall *su)(void *, void *) = (void (__stdcall *)(void *, void *))GetProcAddress(GetModuleHandleA("ddraw.dll"), "RR_InputSetup"); if (su) su(&rec_keyBindings.tbl_keyBindings, &(*(char *)&rec_sndPlayerEngine.tbl_joyBindings)); }
-        { void (__stdcall *cs)(void *, void *, void *) = (void (__stdcall *)(void *, void *, void *))GetProcAddress(GetModuleHandleA("ddraw.dll"), "RR_CampState"); if (cs) cs(&(*(unsigned char *)&rec_playerRecord.g_playerLevel), &(*(unsigned char *)&rec_playerRecord.g_tracksWonMask), &rec_playerRecord.g_playerCash); }   /* campaign driver: where level, tracks-won mask and cash really are in this build */
+        { void (__stdcall *su)(void *, void *) = (void (__stdcall *)(void *, void *))GetProcAddress(GetModuleHandleA("rrddraw.dll"), "RR_InputSetup"); if (su) su(&rec_keyBindings.tbl_keyBindings, &(*(char *)&rec_sndPlayerEngine.tbl_joyBindings)); }
+        { void (__stdcall *cs)(void *, void *, void *) = (void (__stdcall *)(void *, void *, void *))GetProcAddress(GetModuleHandleA("rrddraw.dll"), "RR_CampState"); if (cs) cs(&(*(unsigned char *)&rec_playerRecord.g_playerLevel), &(*(unsigned char *)&rec_playerRecord.g_tracksWonMask), &rec_playerRecord.g_playerCash); }   /* campaign driver: where level, tracks-won mask and cash really are in this build */
         if (GetEnvironmentVariableA("RR_CASH", b, sizeof b) > 0) { int i; for (i = 0; b[i] >= '0' && b[i] <= '9'; i++) ccash = ccash * 10 + (b[i] - '0'); }
     }
     if (ccash != 0 && !done && (*(unsigned char *)&rec_playerRecord.g_playerCharacter) != 0 && (*(unsigned char *)&rec_playerRecord.g_playerLevel) == 0) {

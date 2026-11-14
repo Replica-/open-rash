@@ -27,7 +27,7 @@ static void SmDraw(Surf *tmp,const Surf *base,const RRSoundMix *d,int sel)
 {   HDC dc; HFONT title,row,old; int i; RECT r; char t[96];
     memcpy(tmp->bits,base->bits,(size_t)tmp->pitch*tmp->h); SdDarken(tmp,0,0,tmp->w,tmp->h); SdDarken(tmp,0,0,tmp->w,96); SdDarken(tmp,24,92,616,474);
     S_GetDC(&tmp->itf,&dc); SetBkMode(dc,TRANSPARENT);
-    title=CreateFontA(54,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Impact"); row=CreateFontA(26,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Impact");
+    title=CreateFontA(54,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_IMPACT)); row=CreateFontA(26,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_IMPACT));
     old=(HFONT)SelectObject(dc,title); SetTextColor(dc,RGB(255,96,40)); TextOutA(dc,SM_X0,28,"Sound Mix",9);
     SelectObject(dc,row);
     for(i=0;i<SM_ROWS;i++){ int y=SM_Y0+i*SM_DY, on=(i==sel); COLORREF c=on?RGB(255,235,80):RGB(245,245,245);
@@ -43,7 +43,7 @@ static void SmDraw(Surf *tmp,const Surf *base,const RRSoundMix *d,int sel)
         else if(i==SM_MUSIC){ const char *v=g_vid.songs?"RANDOM SONGS":"OFF"; TextOutA(dc,SM_X0+20,y,"Music",5); SetTextColor(dc,g_vid.songs?RGB(255,235,80):RGB(150,150,170)); TextOutA(dc,SM_BAR_L,y,v,(int)strlen(v)); }
         else if(i==SM_DONE) TextOutA(dc,SM_X0+20,y,"Done",4);
         else TextOutA(dc,SM_X0+20,y,"Cancel",6); }
-    SetTextColor(dc,RGB(170,170,200)); { HFONT sm=CreateFontA(15,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Arial"); SelectObject(dc,sm); TextOutA(dc,SM_X0+20,452,"Up/Down: choose   Left/Right: change (Shift: fine)   M: mute   Enter: done   Esc: cancel",84); SelectObject(dc,row); DeleteObject(sm); }
+    SetTextColor(dc,RGB(170,170,200)); { HFONT sm=CreateFontA(15,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_ARIAL)); SelectObject(dc,sm); TextOutA(dc,SM_X0+20,452,"Up/Down: choose   Left/Right: change (Shift: fine)   M: mute   Enter: done   Esc: cancel",84); SelectObject(dc,row); DeleteObject(sm); }
     SelectObject(dc,old); DeleteObject(title); DeleteObject(row); GdiFlush(); }
 
 static int SmRowAt(int y){ int i; for(i=0;i<SM_ROWS;i++){ int yy=SM_Y0+i*SM_DY+(i>=SM_DONE?8:0); if(y>=yy-2 && y<yy+SM_DY-4) return i; } return -1; }

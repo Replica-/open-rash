@@ -20,12 +20,12 @@ With the widescreen art mod installed (see below), Video Options > Upscaled Spri
 
 ![Widescreen race in the City, upscaled art](docs/screenshots/race_city_widescreen.jpg)
 
-### True 3D (WIP)
-An optional real 3D world with a much longer draw distance: the road ahead, the hills and the scenery stay visible far into the distance
-(split roads are not shown in this mode). The default, *Pseudo 3D*, redraws the game's own view at high resolution with every road fork intact.
-Gameplay never depends on the view: races play out identically in every mode.
+The GPU redraws the game's own view (*Pseudo 3D*) at high resolution with every road fork intact.
+Gameplay never depends on the view: races play out identically with either renderer.
 
-![True 3D on the Pacific Highway, widescreen with upscaled sprites and the course map](docs/screenshots/true3d_highway.jpg)
+### Steam Deck
+Open Rash runs on the Steam Deck through Proton, as a non-Steam game, with no launch options (see [Playing on the Steam Deck](#playing-on-the-steam-deck)).
+The controls, the menu pictures, the fonts and the GPU renderer work the same as on Windows.
 
 ### The original picture, exactly
 The **software** renderer reproduces the original 640 x 480 picture pixel for pixel, scaled to your window (sharp or smoothed).
@@ -45,7 +45,7 @@ instead of black bars. The artwork is an optional mod, distributed separately: c
 
 ### Video Options
 The Restroom's old "Graphics Options" became **Video Options**: window or fullscreen, window size, fullscreen resolution, smoothing, V-Sync,
-menu scaling, videos, renderer, Pseudo / True 3D, race view and FPS counter - all saved between sessions.
+menu scaling, videos, renderer, race view and FPS counter - all saved between sessions.
 F11 or Alt+Enter switches between window and fullscreen at any time.
 
 ![Video Options](docs/screenshots/video_options.png)
@@ -80,9 +80,13 @@ The **Jukebox** plays any song on request, and the music videos play again (both
 ![Load Game screen](docs/screenshots/load_game.png)
 
 ## What you need
-- Windows 11.
+- Windows 11 to build; Windows 11 or a Steam Deck to play.
 - To play: your own copy of *Road Rash* for Windows 95, copied into `data\` (`AUDIO\`, `DATA\`, `IMAGES\`, `TEXT\`, ...).
 - To build: nothing from the game (see below).
+- Fonts (optional on Windows, needed on the Steam Deck): the menus use Anton, Arimo and Barlow Condensed, free fonts from
+  [Google Fonts](https://fonts.google.com) (SIL Open Font License / Apache 2.0). Put `Anton-Regular.ttf`, `Arimo-Regular.ttf`, `Arimo-Bold.ttf`,
+  `BarlowCondensed-Medium.ttf` and `BarlowCondensed-SemiBold.ttf` in `data\fonts\`. The game loads them for itself only; nothing is installed.
+  Without them it uses Windows' Impact, Arial and Bahnschrift.
 
 ## Building
 Prerequisites:
@@ -93,7 +97,7 @@ Prerequisites:
 Then, in PowerShell from the repository folder:
 
 ```powershell
-scripts\build_quick.ps1     # the game (analysis\build\OpenRash.exe) + ddraw.dll, dsound.dll and SDL3.dll (analysis\build\sdl\)
+scripts\build_quick.ps1     # rrddraw.dll, rrdsound.dll and SDL3.dll (analysis\build\sdl\) + the game (analysis\build\OpenRash.exe)
 scripts\run_new.ps1         # play the latest build in a window, with data\ as the working folder
 ```
 
@@ -105,8 +109,34 @@ scripts\build_quick.ps1 -NoShim       # the game only, not the DLLs
 scripts\run_new.ps1 -Renderer soft    # force a renderer for this run (gpu | soft); -Track 1..5 goes straight into a race
 ```
 
-To play from another folder, put `OpenRash.exe`, `ddraw.dll`, `dsound.dll` and `SDL3.dll` together and start the exe with your
+To play from another folder, put `OpenRash.exe`, `rrddraw.dll`, `rrdsound.dll` and `SDL3.dll` together and start the exe with your
 game folder as the working directory.
+
+## Playing on the Steam Deck
+The game's DirectDraw and DirectSound replacements are named `rrddraw.dll` and `rrdsound.dll`, names Proton has no built-in copy of, so Proton
+always loads the game's own DLLs and no `WINEDLLOVERRIDES` launch option is needed.
+
+1. **Make the game folder on the PC:** build (see above), then make one folder holding your game's `data\` contents (`AUDIO\`, `DATA\`, `IMAGES\`,
+   `TEXT\`, `VIDEO_UP\`, ..., `fonts\` and `mod\` if you have them) plus `OpenRash.exe`, `rrddraw.dll`, `rrdsound.dll` and `SDL3.dll`
+   from `analysis\build` / `analysis\build\sdl`. Leave out `video.ini` and `RoadRash.cfg` (your PC's settings) and any old `ddraw.dll` /
+   `dsound.dll`: under Proton those names load Wine's own DLLs and the picture breaks.
+2. **Copy it to the Deck:** with a USB stick, a microSD card or over the network, for example to `/home/deck/Games/openrash`.
+3. **Add it to Steam** (Desktop Mode): Steam > Games > *Add a Non-Steam Game to My Library* > Browse, and pick `OpenRash.exe`. Then in the game's
+   Properties:
+   - **Start In:** the game folder, for example `"/home/deck/Games/openrash/"` (the game finds its data, settings and saves there).
+   - **Launch Options:** leave empty (`RR_LOG=rr_log.txt %command%` writes a log next to the exe if something goes wrong).
+   - **Compatibility:** force a Steam Play compatibility tool: Proton Experimental (GE-Proton works too).
+4. Back in **Gaming Mode**, start it from the library (Non-Steam).
+
+The Deck's controls reach the game as an Xbox controller through Steam Input: the D-pad / left stick and A / B work in the menus, and each race
+action can be set to a button under Restroom > Configure Inputs. Settings and saves stay in the game folder.
+
+| What you see | Fix |
+|---|---|
+| Black or broken picture | An old `ddraw.dll` / `dsound.dll` is in the folder: delete it. |
+| Plain or wrong fonts | `fonts\` is missing (see What you need). |
+| The game closes at once or reports missing files | **Start In** does not point at the game folder. |
+| The controller does nothing | Check that Steam Input is on for the game, with a Gamepad layout. |
 
 ## Repository layout
 | Path | What |

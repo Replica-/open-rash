@@ -307,12 +307,19 @@ static int GpuCompose(Surf *s)
     if(!g_gpuOn || !g_gpuScene || !g_ren || !g_tex || !s || s->bpp!=8 || s->w!=g_gpuBgW || s->h!=g_gpuBgH) return 0;
     w=s->w; h=s->h; pal=s->pal?s->pal:(g_primary?g_primary->pal:NULL); memset(black,0,sizeof black); pe=pal?pal->e:black;
     for(i=0;i<256;i++) lut[i]=0xFF000000u|((DWORD)pe[i].peRed<<16)|((DWORD)pe[i].peGreen<<8)|pe[i].peBlue;
-    bg=(DWORD*)malloc((size_t)w*h*4); ov=(DWORD*)malloc((size_t)w*h*4); if(!bg || !ov){ free(bg); free(ov); return 0; }
+    {   /* the two pictures' buffers: made once (were 2 x 1.2 MB malloc'ed every frame) */
+        static DWORD *bgB, *ovB; static int bufN; if(bufN<w*h){ free(bgB); free(ovB); bgB=(DWORD*)malloc((size_t)w*h*4); ovB=(DWORD*)malloc((size_t)w*h*4); bufN=bgB && ovB ? w*h : 0; }
+        if(!bufN) return 0; bg=bgB; ov=ovB; }
     memset(hist,0,sizeof hist);
-    for(y=0;y<h;y++){ const BYTE *fr=s->bits+(size_t)y*s->pitch, *sn=g_gpuBg+(size_t)y*w; int inY=(y>=g_gpuClip[1] && y<=g_gpuClip[3]);
-        for(x=0;x<w;x++){ int in=inY && x>=g_gpuClip[0] && x<g_gpuClip[2], f=fr[x];
-            if(in){ int b=sn[x]; bg[y*w+x]=(b==g_gpuMarkPrev)?0xFF000000u:lut[b]; ov[y*w+x]=(f==g_gpuMark)?0:lut[f]; hist[b]++; if(f!=g_gpuMark) hist[f]++; }
-            else { bg[y*w+x]=lut[f]; ov[y*w+x]=0; hist[f]++; } } }
+    {   /* each row in three runs - left of the view, the view, right of it - no test per pixel (user, 2026-11-15: the Steam Deck's frame rate; this copy was
+           ~1.9 ms a frame on a Ryzen 5800X) */
+        int x0=g_gpuClip[0]<0?0:g_gpuClip[0]>w?w:g_gpuClip[0], x1=g_gpuClip[2]<x0?x0:g_gpuClip[2]>w?w:g_gpuClip[2]; DWORD mp=(DWORD)g_gpuMarkPrev, mk=(DWORD)g_gpuMark;
+        for(y=0;y<h;y++){ const BYTE *fr=s->bits+(size_t)y*s->pitch, *sn=g_gpuBg+(size_t)y*w; DWORD *bo=bg+(size_t)y*w, *oo=ov+(size_t)y*w; int a=w, b=w;   /* (outside the view: all of it the left run) */
+            if(y>=g_gpuClip[1] && y<=g_gpuClip[3]){ a=x0; b=x1;
+                for(x=a;x<b;x++){ DWORD sb=sn[x], f=fr[x]; bo[x]=(sb==mp)?0xFF000000u:lut[sb]; hist[sb]++; if(f==mk) oo[x]=0; else { oo[x]=lut[f]; hist[f]++; } } }
+            for(x=0;x<a;x++){ DWORD f=fr[x]; bo[x]=lut[f]; hist[f]++; }
+            for(x=b;x<w;x++){ DWORD f=fr[x]; bo[x]=lut[f]; hist[f]++; }
+            if(a>0) memset(oo,0,(size_t)a*4); if(b<w) memset(oo+b,0,(size_t)(w-b)*4); } }
     { int best=255; long bn=hist[255]; for(i=254;i>=1;i--) if(hist[i]<bn){ bn=hist[i]; best=i; } g_gpuMark=best; }   /* next marker: the colour this frame used least */
     if(!g_gpuOv){ g_gpuOv=SDL_CreateTexture(g_ren,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STREAMING,w,h); if(g_gpuOv) SDL_SetTextureBlendMode(g_gpuOv,SDL_BLENDMODE_BLEND); }
     else { float tw, th; SDL_GetTextureSize(g_gpuOv,&tw,&th); if((int)tw!=w || (int)th!=h){ SDL_DestroyTexture(g_gpuOv); g_gpuOv=SDL_CreateTexture(g_ren,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STREAMING,w,h); if(g_gpuOv) SDL_SetTextureBlendMode(g_gpuOv,SDL_BLENDMODE_BLEND); } }
@@ -325,4 +332,4 @@ static int GpuCompose(Surf *s)
     SDL_SetRenderClipRect(g_ren,NULL);
     if(g_gpuOv){ SDL_UpdateTexture(g_gpuOv,NULL,ov,w*4); SDL_RenderTexture(g_ren,g_gpuOv,NULL,&g_fullRect); }
     GpuDrawExtras(w,h);
-    free(bg); free(ov); return 1; }
+    return 1; }   /* (bg / ov: kept for the next frame) */

@@ -23,7 +23,7 @@ __declspec(dllexport) void __stdcall RR_VideoAsked(void) { g_vpAsked = 1; }
 __declspec(dllexport) int __stdcall RR_PlayVideo(const char *name, int count)
 {   char nm[64], path[MAX_PATH]; wchar_t w[MAX_PATH]; IMFSourceReader *rd = NULL; IMFAttributes *at = NULL; IMFMediaType *mt = NULL; HRESULT hr;
     UINT32 vw = 0, vh = 0; LONG stride = 0; SDL_Texture *tex = NULL; int done = 0, shown = 0, haveAudio = 0, frames = 0; LARGE_INTEGER fq, t0;
-    HMODULE ds = GetModuleHandleA("dsound.dll"); int (__stdcall *play)(const char *, int) = ds ? (int (__stdcall *)(const char *, int))GetProcAddress(ds, "RR_MusicPlay") : NULL;
+    HMODULE ds = GetModuleHandleA("rrdsound.dll"); int (__stdcall *play)(const char *, int) = ds ? (int (__stdcall *)(const char *, int))GetProcAddress(ds, "RR_MusicPlay") : NULL;
     int (__stdcall *stop)(void) = ds ? (int (__stdcall *)(void))GetProcAddress(ds, "RR_MusicStop") : NULL;
     const DWORD VIDEO = 0xFFFFFFFCu, ALL = 0xFFFFFFFEu; static int mfOk; const char *off = getenv("RR_VIDEO"); int asked = g_vpAsked;
     g_vpAsked = 0;

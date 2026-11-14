@@ -16,7 +16,7 @@ RR_DATA(int, g_courseLength);  RR_DATA(int, g_playerRider);  RR_DATA(int, g_copR
 
 static int g_lenInit, g_lenTenths, g_lenPct;
 static int *g_cutObj; static int g_cutVal; static int g_dbgN;
-static void dbg(const char *s) { void (__stdcall *dl)(const char *); HMODULE sh = GetModuleHandleA("ddraw.dll"); dl = sh ? (void (__stdcall *)(const char *))GetProcAddress(sh, "RR_DbgLog") : 0; if (dl) dl(s); }
+static void dbg(const char *s) { void (__stdcall *dl)(const char *); HMODULE sh = GetModuleHandleA("rrddraw.dll"); dl = sh ? (void (__stdcall *)(const char *))GetProcAddress(sh, "RR_DbgLog") : 0; if (dl) dl(s); }
 
 /* test switch RR_FORCE_WIN=1: the computer controlled riders never register as finished, so whoever crosses the line first on the player side - the player - wins (win-screen tests) */
 static int forceWin(void) { static int init, on; if (!init) { char b[4]; init = 1; on = GetEnvironmentVariableA("RR_FORCE_WIN", b, sizeof b) > 0 && b[0] == '1'; } return on; }

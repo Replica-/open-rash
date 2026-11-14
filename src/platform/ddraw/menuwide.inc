@@ -51,7 +51,7 @@ static void MwNoteOpen(const char *rel)
 static float MwLum(DWORD c){ return (float)(((c>>16)&255)*2+((c>>8)&255)*5+(c&255))/8.0f; }
 /* average brightness of 2 columns starting at x, in 48 bands of 10 rows */
 static void MwBands(const DWORD *px,int pitch,int x,float *out){ int b,y; for(b=0;b<48;b++){ float s=0; for(y=b*10;y<b*10+10;y++) s+=MwLum(px[y*pitch+x])+MwLum(px[y*pitch+x+1]); out[b]=s/20.0f; } }
-__declspec(dllexport) unsigned char * __stdcall RR_DecodeJpeg(const void *data, unsigned size, int *w, int *h);   /* wicjpeg.c */
+__declspec(dllexport) unsigned char * __stdcall RR_DecodeJpeg(const void *data, unsigned size, int *w, int *h);   /* jpeg.c */
 __declspec(dllexport) void __stdcall RR_FreeImage(void *p);
 /* the edge bands of a 640x480 .RRI picture (a JPEG) itself, as MwBands measures the frame: 0 = not readable */
 static int MwPicEdges(const char *rri,float edge[2][48])

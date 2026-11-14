@@ -230,7 +230,7 @@ void rr_RoadViewInit(void)
     rr_rvCount = 33;
     if (GetEnvironmentVariableA("RR_DRAW_DIST", e, sizeof e) > 0) { int v = 0; for (i = 0; e[i] >= '0' && e[i] <= '9'; i++) v = v * 10 + (e[i] - '0'); if (v >= 8 && v <= RV_MAX) rr_rvCount = v; }
     else {
-        HMODULE m = GetModuleHandleA("ddraw.dll");
+        HMODULE m = GetModuleHandleA("rrddraw.dll");
         int (__stdcall *dd)(void) = m ? (int (__stdcall *)(void))GetProcAddress(m, "RR_DrawDistance") : 0;
         if (dd && rr_gpuRace) { int v = dd(); if (v >= 8 && v <= RV_MAX) rr_rvCount = v; }   /* the option only applies to GPU races (software races keep the original 33) */
     }

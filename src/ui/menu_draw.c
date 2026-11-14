@@ -167,7 +167,7 @@ void __fastcall rr_StatusLineFormat(unsigned flags)
                    Now the song the shim's song player is playing (RR_SongPlaying: the game's track 0..13), and no box when none plays */
                 static int (__stdcall *playing)(void); static int looked; int grp = g_musicGroup, trk = g_musicTrack;
                 unsigned __fastcall rr_MusicTrackGroup(unsigned track);
-                if (!looked) { HMODULE m = GetModuleHandleA("ddraw.dll"); looked = 1; if (m) playing = (int (__stdcall *)(void))GetProcAddress(m, "RR_SongPlaying"); }
+                if (!looked) { HMODULE m = GetModuleHandleA("rrddraw.dll"); looked = 1; if (m) playing = (int (__stdcall *)(void))GetProcAddress(m, "RR_SongPlaying"); }
                 if (playing) { trk = playing(); if (trk < 0) { MenuLabelDraw(g_statusWindow, 0, 0x4852, flags | 0xc); return; } grp = (int)rr_MusicTrackGroup((unsigned)trk); }
                 sprintf(&g_statusText, *(char **)(g_configBlock + 0x2c),
                         *(int *)(g_configBlock + 900 + grp * 4),

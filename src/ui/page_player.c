@@ -69,7 +69,7 @@ unsigned __fastcall rr_MoviePlay(char *name, int count, unsigned flags)
     {   /* the video (shim videoplay.inc: VIDEO_UP\<name>[1..count].mp4 through Media Foundation; nothing in test runs).  Between the game's own pause and
            resume, as the original's player was; the variant is picked by the shim with its own random numbers (the game's stay untouched) */
         static int (__stdcall *pv)(const char *, int); static int looked;
-        if (!looked) { HMODULE m = GetModuleHandleA("ddraw.dll"); looked = 1; if (m) pv = (int (__stdcall *)(const char *, int))GetProcAddress(m, "RR_PlayVideo"); }
+        if (!looked) { HMODULE m = GetModuleHandleA("rrddraw.dll"); looked = 1; if (m) pv = (int (__stdcall *)(const char *, int))GetProcAddress(m, "RR_PlayVideo"); }
         if (pv) pv(vname, count);
     }
     SoundThreadRequest((int)flags);

@@ -53,7 +53,7 @@ static int g_quadCount;
 /* the race world is on screen once a frame draws 30+ quads (the pre-race countdown and the menus draw only a few); that moment is "race frame 0" for the test scripts */
  RR_DATA(int, g_fbOffsetX); RR_DATA(int, g_fbOffsetY); RR_DATA(int, g_frameSurface);
 static int g_dbgScene = -1;
-static void DbgScene(void) { char b[300]; void (__stdcall *dl)(const char *); HMODULE sh; if (g_dbgScene < 0) { char e[4]; g_dbgScene = GetEnvironmentVariableA("RR_LOG_PRESENTS", e, sizeof e) > 0; } if (!g_dbgScene) return; sh = GetModuleHandleA("ddraw.dll"); dl = sh ? (void (__stdcall *)(const char *))GetProcAddress(sh, "RR_DbgLog") : 0; if (!dl) return;
+static void DbgScene(void) { char b[300]; void (__stdcall *dl)(const char *); HMODULE sh; if (g_dbgScene < 0) { char e[4]; g_dbgScene = GetEnvironmentVariableA("RR_LOG_PRESENTS", e, sizeof e) > 0; } if (!g_dbgScene) return; sh = GetModuleHandleA("rrddraw.dll"); dl = sh ? (void (__stdcall *)(const char *))GetProcAddress(sh, "RR_DbgLog") : 0; if (!dl) return;
     wsprintfA(b, "scene quad 30: frame %d clip %d,%d,%d,%d base %08x pitch %d off %d,%d surface %08x", g_frameCounter, rec_featureAccum1.g_viewport, rec_featureAccum1.g_viewportTop, rec_featureAccum1.g_viewportRight, rec_featureAccum1.g_viewportBottom, rec_featureAccum1.g_fbOrigin, rec_featureAccum1.g_fbPitch, g_fbOffsetX, g_fbOffsetY, (unsigned)g_frameSurface); dl(b);
     { short *q = &rec_sndPlayerEngine.g_quadVerts; unsigned short cw = 0; int *nd = (int *)(*(int *)&rec_sndPlayerEngine.g_drawNode); __asm { fnstcw cw } wsprintfA(b, "quad regs %d,%d,%d,%d  %d,%d,%d,%d  fpucw %04x node %08x v %d,%d %d,%d", q[0], q[1], q[4], q[5], q[8], q[9], q[12], q[13], cw, (unsigned)nd, nd ? nd[6] : 0, nd ? nd[7] : 0, nd ? nd[8] : 0, nd ? nd[9] : 0); dl(b); } }
 void rr_NoteQuad(void) { if (g_quadCount == 29) DbgScene();
@@ -72,7 +72,7 @@ void __stdcall rr_MainLoop(void)
     { char e[12]; int i; if (GetEnvironmentVariableA("RR_SKIP_TO", e, sizeof e) > 0) for (i = 0; e[i] >= '0' && e[i] <= '9'; i++) skipTo = skipTo * 10 + (e[i] - '0'); }
     rr_RoadViewInit();   /* src\game\roadview.c: view distance tables */
     rr_QuadLogInit();
-    { HMODULE sh = GetModuleHandleA("ddraw.dll"); if (sh) { void (__stdcall *sp)(volatile int *) = (void (__stdcall *)(volatile int *))GetProcAddress(sh, "RR_SetFramePtr"); if (sp) sp((volatile int *)&g_frameCounter); }
+    { HMODULE sh = GetModuleHandleA("rrddraw.dll"); if (sh) { void (__stdcall *sp)(volatile int *) = (void (__stdcall *)(volatile int *))GetProcAddress(sh, "RR_SetFramePtr"); if (sp) sp((volatile int *)&g_frameCounter); }
       if (sh) { void (__stdcall *rp)(volatile int *, volatile int *, volatile int *) = (void (__stdcall *)(volatile int *, volatile int *, volatile int *))GetProcAddress(sh, "RR_SetRoadPosPtrs"); if (rp) rp((volatile int *)&rec_stepSaved.g_camRoadPos, (volatile int *)&rec_stepSaved.g_camLateral, (volatile int *)&(*(int *)&rec_demoPage.g_raceTrack)); }   /* RR_SHOW_POS overlay */
       if (sh) { void (__stdcall *rg)(unsigned **, int *) = (void (__stdcall *)(unsigned **, int *))GetProcAddress(sh, "RR_SetRingPtrs"); if (rg) rg(&rr_ring, &rr_ringN); }   /* the road ring (shim test switch RR_SHOT_LAYOUT: pictures at forks / joins) */
       g_shimScene = sh ? (void (__stdcall *)(void))GetProcAddress(sh, "RR_NoteSceneFrame") : 0; g_shimDet = sh ? (int (__stdcall *)(void))GetProcAddress(sh, "RR_DetOn") : 0; }
@@ -107,7 +107,7 @@ void __stdcall rr_MainLoop(void)
                 (*(int *)&rec_Controls.g_mainLoopRunning) = 0;
                 return;
             }
-            if (g_dbgScene > 0 && g_frameCounter >= 30 && g_frameCounter < 34) { char b[120]; void (__stdcall *dl)(const char *) = (void (__stdcall *)(const char *))GetProcAddress(GetModuleHandleA("ddraw.dll"), "RR_DbgLog"); if (dl) { wsprintfA(b, "frame %d drew %d quads (node list head %08x)", g_frameCounter, g_quadCount, (unsigned)(*(int *)&rec_sndPlayerEngine.g_drawNode)); dl(b); } }
+            if (g_dbgScene > 0 && g_frameCounter >= 30 && g_frameCounter < 34) { char b[120]; void (__stdcall *dl)(const char *) = (void (__stdcall *)(const char *))GetProcAddress(GetModuleHandleA("rrddraw.dll"), "RR_DbgLog"); if (dl) { wsprintfA(b, "frame %d drew %d quads (node list head %08x)", g_frameCounter, g_quadCount, (unsigned)(*(int *)&rec_sndPlayerEngine.g_drawNode)); dl(b); } }
             g_sceneLast = g_sceneNow; g_sceneNow = 0; g_quadCount = 0;
             GameFrameDraw();
             rr_StateLog(g_frameCounter);
@@ -125,7 +125,7 @@ void __stdcall rr_MainLoop(void)
                 QueryPerformanceCounter(&now);
                 {   /* RR_DEMO_ALL (the shim's RR_GameSpeed, percent; Up / Down): the race clock runs faster / slower - its start moves back by (speed - 1) x the real time since the last look */
                     static int (__stdcall *gs)(void); static int looked; static __int64 last; __int64 t = ((__int64)now.HighPart << 32) | now.LowPart;
-                    if (!looked) { HMODULE sh = GetModuleHandleA("ddraw.dll"); gs = sh ? (int (__stdcall *)(void))GetProcAddress(sh, "RR_GameSpeed") : 0; looked = 1; }
+                    if (!looked) { HMODULE sh = GetModuleHandleA("rrddraw.dll"); gs = sh ? (int (__stdcall *)(void))GetProcAddress(sh, "RR_GameSpeed") : 0; looked = 1; }
                     if (gs && gs() == 0) {   /* paused (speed 0): the race waits here - keep the window answering, the shim reads Up / Down / Q in gs() */
                         MSG m; while (PeekMessageA(&m, 0, 0, 0, PM_REMOVE)) { TranslateMessage(&m); DispatchMessageA(&m); }
                         Sleep(10);

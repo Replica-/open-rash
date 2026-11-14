@@ -79,7 +79,7 @@ static void arrow_cursor(void) { SetCursor(LoadCursorA(NULL, (LPCSTR)IDC_ARROW))
 /* the save / load screen: the shim's RR_FileDialog (savedlg.inc) in place of comdlg32 GetSaveFileNameA / GetOpenFileNameA (same struct, same result) */
 static BOOL file_dialog(int saving)
 {
-    HMODULE sh = GetModuleHandleA("ddraw.dll");
+    HMODULE sh = GetModuleHandleA("rrddraw.dll");
     BOOL (__stdcall *f)(OPENFILENAMEA *, int) = sh ? (BOOL (__stdcall *)(OPENFILENAMEA *, int))GetProcAddress(sh, "RR_FileDialog") : 0;
     return f ? f(&g_openFileName, saving) : FALSE;
 }
@@ -159,7 +159,7 @@ UINT_PTR __stdcall rr_FileDialogHook(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 RR_REPLACE(RestroomBlankItem, rr_RestroomBlankItem);
 int __cdecl rr_RestroomBlankItem(void)
 {
-    HMODULE sh = GetModuleHandleA("ddraw.dll");
+    HMODULE sh = GetModuleHandleA("rrddraw.dll");
     int (__stdcall *f)(void) = sh ? (int (__stdcall *)(void))GetProcAddress(sh, "RR_RiderColours") : 0;
     if (f) f();
     return 0;
@@ -224,7 +224,7 @@ int __fastcall rr_OptionPageClose(int *item)
    afterwards the Restroom is built again (the menu strips may have been switched on or off) */
 int __fastcall rr_RestroomMods(int *item)
 {
-    HMODULE sh = GetModuleHandleA("ddraw.dll");
+    HMODULE sh = GetModuleHandleA("rrddraw.dll");
     int (__stdcall *f)(void) = sh ? (int (__stdcall *)(void))GetProcAddress(sh, "RR_ModsConfig") : 0;
     (void)item;
     if (f && f()) return (*(int *)&rec_menuScreen.g_menuScreen);
@@ -292,7 +292,7 @@ int __fastcall rr_JukeboxSongPick(int *item)
     if (item[1]) {
         static int (__stdcall *juke)(int); static int looked;
         WindowPosSave((*(UINT *)&g_songMessages.g_msgSongChanged), item[1] - 0xe1, item[2] - 0xf1);   /* (the choice: group / track, kept in the settings) */
-        if (!looked) { HMODULE m = GetModuleHandleA("ddraw.dll"); looked = 1; if (m) juke = (int (__stdcall *)(int))GetProcAddress(m, "RR_JukeboxSong"); }
+        if (!looked) { HMODULE m = GetModuleHandleA("rrddraw.dll"); looked = 1; if (m) juke = (int (__stdcall *)(int))GetProcAddress(m, "RR_JukeboxSong"); }
         /* the shim's song player plays the track at once (AUDIO\MUSIC\<track>.RRA, with its title); only when it cannot does the game's own music thread try -
            never both (they would play the same song twice) */
         if (!juke || !juke(item[2] - 0xf1)) PostThreadMessageA(g_soundThreadId, (*(UINT *)&g_songMessages.g_msgSongChanged), 0, 0);
@@ -337,7 +337,7 @@ int __fastcall rr_OptionPageNext(int *item)
     if (saved == 0) g_videoMode = 2;
     {   /* a video the player picked (Restroom > Jukebox > Videos) plays even with Video Options > Videos = Off, as the original ignored its own video setting here */
         static void (__stdcall *asked)(void); static int looked;
-        if (!looked) { HMODULE m = GetModuleHandleA("ddraw.dll"); looked = 1; if (m) asked = (void (__stdcall *)(void))GetProcAddress(m, "RR_VideoAsked"); }
+        if (!looked) { HMODULE m = GetModuleHandleA("rrddraw.dll"); looked = 1; if (m) asked = (void (__stdcall *)(void))GetProcAddress(m, "RR_VideoAsked"); }
         if (asked) asked();
     }
     MoviePlay((&tbl_musicVideos)[item[1]], 0, 4);

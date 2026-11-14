@@ -11,7 +11,7 @@
  *                         KEY : ENTER ESC SPACE UP DOWN LEFT RIGHT TAB DELETE INSERT HOME END PAGEUP PAGEDOWN CTRL SHIFT ALT BACK, A..Z, 0..9, F1..F12, NUMPAD0..NUMPAD9, DECIMAL, a decimal VK, or NONE
  *   race actions        : ACTION=INPUT  ACTION: ACCELERATE BRAKE TURN_LEFT TURN_RIGHT LEAN_1 LEAN_2 NITRO SWING KICK BACKHAND DISMOUNT
  *                         INPUT : A B X Y LB RB LT RT LS RS START BACK DPAD_UP/DOWN/LEFT/RIGHT STICK_UP/DOWN/LEFT/RIGHT (left stick) RSTICK_UP/DOWN/LEFT/RIGHT, or NONE
- * RR_CONTROLLER=off disables it; it is never active in the headless / scripted test modes and only while the game window is in the foreground.
+ * RR_CONTROLLER=off disables it; it is never active in the headless / scripted test modes and only while a window of the game is in the foreground (rrddraw.c RrOurFocus).
  */
 typedef struct { WORD wButtons; BYTE bLT, bRT; SHORT sLX, sLY, sRX, sRY; } CtlPad;
 typedef struct { DWORD packet; CtlPad pad; } CtlState;
@@ -100,9 +100,11 @@ static DWORD WINAPI CtlThread(LPVOID unused)
     if(!CtlXInput()) return 0;
     memset(have,0,sizeof have); memset(since,0,sizeof since); memset(lastRep,0,sizeof lastRep);
     for(;;)
-    {   BYTE want[256]; int on[PI_N], vk, race; DWORD now; HWND fg=GetForegroundWindow();
+    {   BYTE want[256]; int on[PI_N], vk, race; DWORD now;
         memset(want,0,sizeof want); Sleep(8); now=GetTickCount(); race=CtlInRace();
-        if(g_hwnd && fg==g_hwnd && !g_icPadCapture)
+        if(g_log){ static DWORD lastLog; if(now-lastLog>5000){ int tmp[PI_N], pads=CtlPadRead(tmp), held=0, i; HWND fg=GetForegroundWindow(); DWORD pid=0; lastLog=now; for(i=0;i<PI_N;i++) held+=tmp[i]; if(fg) GetWindowThreadProcessId(fg,&pid);   /* (RR_LOG: what the pad thread sees - the Steam Deck: user, "steam deck controls didnt work") */
+            LOG("controller: pad %s, %d inputs held, foreground %p (process %lu, ours %lu, game window %p) -> %s", pads ? "connected" : "none", held, (void*)fg, (unsigned long)pid, (unsigned long)GetCurrentProcessId(), (void*)g_hwnd, RrOurFocus() ? "reading" : "ignored (not focused)"); } }
+        if(g_hwnd && RrOurFocus() && !g_icPadCapture)
         {   CtlPadRead(on);
             if(race)
             {   int r, a;

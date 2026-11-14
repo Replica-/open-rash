@@ -337,7 +337,7 @@ unsigned __fastcall rr_MenuItemActivate(int obj)
     else target = *(int *)(obj + 4);
     if (target == 0) return 0;
     if (target == 0x13) {   /* Restroom "Video Options" (was the Graphics Options page): the shim's own screen; afterwards rebuild the page we came from */
-        int (__stdcall *cfg)(void) = (int (__stdcall *)(void))GetProcAddress(GetModuleHandleA("ddraw.dll"), "RR_VideoConfig");
+        int (__stdcall *cfg)(void) = (int (__stdcall *)(void))GetProcAddress(GetModuleHandleA("rrddraw.dll"), "RR_VideoConfig");
         if (cfg && cfg()) target = (*(int *)&rec_menuScreen.g_menuScreen);
     }
     return MenuScreenShow(target);

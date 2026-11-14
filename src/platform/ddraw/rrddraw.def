@@ -1,4 +1,4 @@
-LIBRARY ddraw
+LIBRARY rrddraw
 EXPORTS
 DirectDrawCreate
 RR_MessageBox=_RR_MessageBox@16

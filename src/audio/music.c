@@ -41,7 +41,7 @@ static int try_wave_music(const char *midiPath)
 {
     static MusicPlayFn play; static int looked;
     char cand[MAX_PATH], rel[MAX_PATH]; const char *p = midiPath; size_t n; char *dot; int i, k;
-    if (!looked) { HMODULE m = GetModuleHandleA("dsound.dll"); looked = 1; if (m) play = (MusicPlayFn)GetProcAddress(m, "RR_MusicPlay"); }
+    if (!looked) { HMODULE m = GetModuleHandleA("rrdsound.dll"); looked = 1; if (m) play = (MusicPlayFn)GetProcAddress(m, "RR_MusicPlay"); }
     if (!play) return 0;
     if (p[0] == (char)46 && (p[1] == (char)47 || p[1] == (char)92)) p += 2;
     lstrcpynA(rel, p, sizeof rel); dot = strrchr(rel, (char)46); if (!dot) return 0;
@@ -72,7 +72,7 @@ unsigned int __fastcall rr_PlayMusicTrack(unsigned int unused, int track)
     }
     {   /* Sound Mix > Music = Random songs (shim musicbox.inc): the songs replace the game's own music in menus and races */
         static int (__stdcall *songsOn)(void); static int looked;
-        if (!looked) { HMODULE m = GetModuleHandleA("ddraw.dll"); looked = 1; if (m) songsOn = (int (__stdcall *)(void))GetProcAddress(m, "RR_SongsOn"); }
+        if (!looked) { HMODULE m = GetModuleHandleA("rrddraw.dll"); looked = 1; if (m) songsOn = (int (__stdcall *)(void))GetProcAddress(m, "RR_SongsOn"); }
         if (songsOn && songsOn()) { (*(char *)&rec_sndPlayerEngine.g_musicPlaying) = 0; return 0; }
     }
 

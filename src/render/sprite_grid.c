@@ -31,7 +31,7 @@ int __fastcall rr_ConfigureInputOpen(int page)
     char *key = &rec_keyBindings.tbl_keyBindings, *buf = &tbl_bindingTexts;
     int i;
     {   /* the shim's own Configure Input screen (keyboard + controller tabs); afterwards stay on the page we came from (the Restroom) */
-        int (__stdcall *cfg)(unsigned char *, unsigned char *) = (int (__stdcall *)(unsigned char *, unsigned char *))GetProcAddress(GetModuleHandleA("ddraw.dll"), "RR_InputConfig");
+        int (__stdcall *cfg)(unsigned char *, unsigned char *) = (int (__stdcall *)(unsigned char *, unsigned char *))GetProcAddress(GetModuleHandleA("rrddraw.dll"), "RR_InputConfig");
         if (cfg && cfg((unsigned char *)&rec_keyBindings.tbl_keyBindings, &(*(unsigned char *)&rec_sndPlayerEngine.tbl_joyBindings))) return (*(int *)&rec_menuScreen.g_menuScreen);
     }
     for (i = 0; i < 0x2c; i += 4, key += 2, buf += 0x40) {

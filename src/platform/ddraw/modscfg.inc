@@ -76,8 +76,8 @@ static void McDraw(Surf *tmp,const Surf *base,const VcState *s,DWORD now)
 {   HDC dc; HFONT title,row,fSm,fMid,old; int i; char t[128];
     memcpy(tmp->bits,base->bits,(size_t)tmp->pitch*tmp->h); SdDarken(tmp,0,0,tmp->w,tmp->h); SdDarken(tmp,8,8,632,472);
     S_GetDC(&tmp->itf,&dc); SetBkMode(dc,TRANSPARENT);
-    title=CreateFontA(44,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Impact"); row=CreateFontA(20,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Impact");
-    fSm=CreateFontA(13,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Arial"); fMid=CreateFontA(15,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Arial");
+    title=CreateFontA(44,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_IMPACT)); row=CreateFontA(20,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_IMPACT));
+    fSm=CreateFontA(13,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_ARIAL)); fMid=CreateFontA(15,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_ARIAL));
     old=(HFONT)SelectObject(dc,title); IcText(dc,18,8,"Game Options",RGB(255,96,40),TA_LEFT|TA_TOP);
     SelectObject(dc,fMid); IcText(dc,20,62,VidHdArtInstalled()?"Widescreen mod: installed (mod\\widescreen)":"Widescreen mod: not installed - copy the widescreen folder into the game's mod folder",RGB(190,190,215),TA_LEFT|TA_TOP);
     for(i=0;i<MC_ROWS;i++){ int y=McRowY(i), on=(i==s->sel), en=McRowEnabled(i), x=McIndent(i); COLORREF c=!en?RGB(110,110,130):(on?RGB(255,235,80):RGB(235,235,240));

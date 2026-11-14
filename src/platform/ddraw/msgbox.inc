@@ -38,8 +38,8 @@ static void MbDraw(Surf *tmp,const Surf *base,const char *title,const char *text
     COLORREF accent=(type&0xF0)==MB_ICONERROR?RGB(235,70,55):RGB(255,96,40); const char *ttl=title&&title[0]?title:"Road Rash";
     memcpy(tmp->bits,base->bits,(size_t)tmp->pitch*tmp->h); SdDarken(tmp,0,0,tmp->w,tmp->h); SdDarken(tmp,bx-6,by-6,bwid+12,bhgt+12);
     S_GetDC(&tmp->itf,&dc); SetBkMode(dc,TRANSPARENT);
-    big=CreateFontA(38,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Impact"); mid=CreateFontA(17,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Arial");
-    btn=CreateFontA(22,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Impact"); sm=CreateFontA(13,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Arial");
+    big=CreateFontA(38,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_IMPACT)); mid=CreateFontA(17,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_ARIAL));
+    btn=CreateFontA(22,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_IMPACT)); sm=CreateFontA(13,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_ARIAL));
     IcBox(dc,bx,by,bwid,bhgt,RGB(16,16,34),RGB(90,90,130),12);
     old=(HFONT)SelectObject(dc,big); IcText(dc,bx+22,by+10,ttl,accent,TA_LEFT|TA_TOP);
     SelectObject(dc,mid); SetTextColor(dc,RGB(225,225,240)); SetRect(&tr,bx+24,by+62,bx+bwid-24,by+bhgt-bh-30);

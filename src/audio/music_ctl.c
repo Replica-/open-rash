@@ -21,7 +21,7 @@
 typedef int (__stdcall *ShimFn0)(void);
 static int shim_call(const char *name)
 {
-    HMODULE m = GetModuleHandleA("dsound.dll");
+    HMODULE m = GetModuleHandleA("rrdsound.dll");
     ShimFn0 fn = m ? (ShimFn0)GetProcAddress(m, name) : 0;
     return fn ? fn() : 0;
 }

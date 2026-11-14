@@ -26,7 +26,7 @@ INT_PTR __cdecl rr_Alert(unsigned char flag, char *fmt, ...)
     char text[512];
     va_list args;
     HWND prevFocus = GetFocus();
-    HMODULE shim = GetModuleHandleA("ddraw.dll");
+    HMODULE shim = GetModuleHandleA("rrddraw.dll");
     ShimMessageBox box = shim ? (ShimMessageBox)GetProcAddress(shim, "RR_MessageBox") : 0;
     int answer;
 

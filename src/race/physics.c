@@ -279,7 +279,7 @@ static int ForkEnv(void)
     return w; }
 static int ForkShim(void)
 {   static int init; static int (__stdcall *f)(void);
-    if (!init) { HMODULE m = GetModuleHandleA("ddraw.dll"); init = 1; f = m ? (int (__stdcall *)(void))GetProcAddress(m, "RR_ForkPick") : 0; }
+    if (!init) { HMODULE m = GetModuleHandleA("rrddraw.dll"); init = 1; f = m ? (int (__stdcall *)(void))GetProcAddress(m, "RR_ForkPick") : 0; }
     return f ? f() : 0; }
 static int ForkWanted(void) { int w = ForkEnv(); return w ? w : ForkShim(); }
 static int ForkIsPlayer(int o) { return ForkEnv() ? g_playerRider != 0 && (o == g_playerRider || o == I32(g_playerRider, 0x2fc)) : 1; }   /* (RR_FORK: the player only; forks off: every rider) */

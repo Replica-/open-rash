@@ -25,7 +25,7 @@ static void CarHitLog(const int *a, const int *b)
     static int on = -1; char e[4], s[160]; void (__stdcall *dl)(const char *);
     if (on < 0) on = GetEnvironmentVariableA("RR_CARHITS", e, sizeof e) > 0;
     if (!on || a[0xc4 / 4] != 1 || b[0xc4 / 4] != 1) return;
-    dl = (void (__stdcall *)(const char *))GetProcAddress(GetModuleHandleA("ddraw.dll"), "RR_DbgLog");
+    dl = (void (__stdcall *)(const char *))GetProcAddress(GetModuleHandleA("rrddraw.dll"), "RR_DbgLog");
     if (!dl) return;
     wsprintfA(s, "carhit frame %d: road %d.%03d x %d kind %d lane %d  vs  road %d.%03d x %d kind %d lane %d", rec_featureAccum1.g_raceTime,
               a[0x1c / 4] >> 8, (a[0x1c / 4] & 255) * 1000 / 256, a[0x28 / 4] >> 8, a[0x73], (char)a[0x7a],

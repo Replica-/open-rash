@@ -594,12 +594,12 @@ static unsigned char g_rcOrig[15 * 256]; static int g_rcHave;
 int rr_rcTrueRow = -1;   /* true-colour mode (RR_RiderRow == 2): the player's row; its tiles keep the template indices (road_view.c) and go to the GPU flagged
                             RRG_TRUECOL (gpu_scene.c): the shim colours them with the player's own colours.  -1 = off */
 void rr_RiderTableInit(void)
-{   HMODULE sh = GetModuleHandleA("ddraw.dll"); void (__stdcall *f)(const unsigned char *);
+{   HMODULE sh = GetModuleHandleA("rrddraw.dll"); void (__stdcall *f)(const unsigned char *);
     if (!g_rcHave) { memcpy(g_rcOrig, &tbl_riderColourRemap, sizeof g_rcOrig); g_rcHave = 1; }
     f = sh ? (void (__stdcall *)(const unsigned char *))GetProcAddress(sh, "RR_SetRiderTable") : 0;
     if (f) f(g_rcOrig); }
 static void RiderColoursApply(int row)
-{   HMODULE sh = GetModuleHandleA("ddraw.dll"); int (__stdcall *f)(int, unsigned char *); unsigned char buf[256];
+{   HMODULE sh = GetModuleHandleA("rrddraw.dll"); int (__stdcall *f)(int, unsigned char *); unsigned char buf[256];
     if (!g_rcHave) rr_RiderTableInit();
     memcpy(&tbl_riderColourRemap, g_rcOrig, sizeof g_rcOrig);   /* (the previous race's custom row out) */
     f = sh ? (int (__stdcall *)(int, unsigned char *))GetProcAddress(sh, "RR_RiderRow") : 0;
@@ -1640,7 +1640,7 @@ void __fastcall rr_FrameBorderDraw(int x, int yoff)
     while (x < 0) x += g_horizonPeriod;
     {   /* tell the shim where the panorama goes this frame (GPU renderer: HD sky replacement, menu Video Options > Sky); nothing the game reads changes */
         static void (__stdcall *skyInfo)(int, int, int, int, int, int); static int looked;
-        if (!looked) { HMODULE sh = GetModuleHandleA("ddraw.dll"); looked = 1; skyInfo = sh ? (void (__stdcall *)(int, int, int, int, int, int))GetProcAddress(sh, "RR_SkyInfo") : 0; }
+        if (!looked) { HMODULE sh = GetModuleHandleA("rrddraw.dll"); looked = 1; skyInfo = sh ? (void (__stdcall *)(int, int, int, int, int, int))GetProcAddress(sh, "RR_SkyInfo") : 0; }
         if (skyInfo) skyInfo(x, yoff, g_fbOffsetX, g_fbOffsetY, rec_featureAccum1.g_screenHeight, g_horizonPeriod);
     }
     if (rec_Controls.g_projWidth > 320 && g_hiResRace != 0) {

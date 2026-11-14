@@ -1,4 +1,4 @@
-LIBRARY dsound
+LIBRARY rrdsound
 EXPORTS
 DirectSoundCreate @1
 RR_MusicPlay=_RR_MusicPlay@8 @100

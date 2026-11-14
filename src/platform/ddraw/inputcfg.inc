@@ -91,7 +91,7 @@ static const IcKey g_icKeys[] = {
 static int IcRowOfVk(int vk){ int r; if(!g_icBlob || !g_icKeymap || vk<=0 || vk>=256) return -1; for(r=0;r<IC_ROWS;r++){ BYTE id=g_icBlob[g_icSlot[r]*2+1]; if(id && id==g_icKeymap[vk]) return r; } return -1; }
 
 static void IcDrawKeyboard(HDC dc,int ox,int oy,int unit,int ky,int sel,DWORD now)
-{   int i, selVk=IcActVk(sel>=0&&sel<IC_ROWS?sel:0); HFONT f=CreateFontA(13,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Arial"), old=(HFONT)SelectObject(dc,f);
+{   int i, selVk=IcActVk(sel>=0&&sel<IC_ROWS?sel:0); HFONT f=CreateFontA(13,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_ARIAL)), old=(HFONT)SelectObject(dc,f);
     SetBkMode(dc,TRANSPARENT);
     for(i=0;i<(int)(sizeof g_icKeys/sizeof g_icKeys[0]);i++){ const IcKey *k=&g_icKeys[i]; int x=ox+k->x10*unit/10, y=oy+k->y10*ky/10, w=k->w10*unit/10-2, h=k->h10*ky/10-3;
         int row=IcRowOfVk(k->vk), usable=(g_icKeymap && g_icKeymap[k->vk]!=0); COLORREF fill, frame, txt;
@@ -105,7 +105,7 @@ static void IcDrawKeyboard(HDC dc,int ox,int oy,int unit,int ky,int sel,DWORD no
             else if(k->vk==0x25){ p[0].x=cx-d; p[0].y=cy; p[1].x=cx+d/2; p[1].y=cy-d; p[2].x=cx+d/2; p[2].y=cy+d; } else { p[0].x=cx+d; p[0].y=cy; p[1].x=cx-d/2; p[1].y=cy-d; p[2].x=cx-d/2; p[2].y=cy+d; }
             IcPoly(dc,p,3,c,c); }
         else if(k->lab[0]){ SIZE sz; HFONT sm=NULL, o2=NULL; int len=(int)strlen(k->lab);
-            if(len>1){ sm=CreateFontA(len>=4?8:10,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Arial"); o2=(HFONT)SelectObject(dc,sm); }
+            if(len>1){ sm=CreateFontA(len>=4?8:10,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_ARIAL)); o2=(HFONT)SelectObject(dc,sm); }
             GetTextExtentPoint32A(dc,k->lab,len,&sz); SetTextColor(dc,txt); TextOutA(dc,x+(w-sz.cx)/2,y+(h-sz.cy)/2,k->lab,len);
             if(sm){ SelectObject(dc,o2); DeleteObject(sm); } } }
     (void)selVk; SelectObject(dc,old); DeleteObject(f); }
@@ -119,7 +119,7 @@ static COLORREF IcPadFill(int pi,int sel,DWORD now,COLORREF base,COLORREF *frame
 {   int r=IcRowOfPad(pi); *frame=RGB(150,150,175); if(r<0) return base; *frame=RGB(255,255,255); if(r==sel && ((now/250)&1)) *frame=RGB(255,255,120); return g_icCol[r]; }
 
 static void IcDrawPad(HDC dc,int ox,int oy,int sel,DWORD now)
-{   COLORREF fr, body=RGB(60,62,90), dark=RGB(36,36,58), fill; POINT p[8]; HFONT f=CreateFontA(11,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Arial"), old=(HFONT)SelectObject(dc,f);
+{   COLORREF fr, body=RGB(60,62,90), dark=RGB(36,36,58), fill; POINT p[8]; HFONT f=CreateFontA(11,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_ARIAL)), old=(HFONT)SelectObject(dc,f);
     int bx=ox, by=oy;   /* body origin; the body is about 280 x 150 */
     SetBkMode(dc,TRANSPARENT);
     /* triggers and bumpers */
@@ -160,8 +160,8 @@ static void IcDraw(Surf *tmp,const Surf *base,const IcState *s,DWORD now)
 {   HDC dc; HFONT title,row,fSm,fMid,old; int i; char t[96]; RECT r;
     memcpy(tmp->bits,base->bits,(size_t)tmp->pitch*tmp->h); SdDarken(tmp,0,0,tmp->w,tmp->h); SdDarken(tmp,8,8,632,472);
     S_GetDC(&tmp->itf,&dc); SetBkMode(dc,TRANSPARENT);
-    title=CreateFontA(44,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Impact"); row=CreateFontA(20,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Impact");
-    fSm=CreateFontA(13,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Arial"); fMid=CreateFontA(15,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Arial");
+    title=CreateFontA(44,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_IMPACT)); row=CreateFontA(20,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_IMPACT));
+    fSm=CreateFontA(13,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_ARIAL)); fMid=CreateFontA(15,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_ARIAL));
     old=(HFONT)SelectObject(dc,title); IcText(dc,18,8,"Configure Input",RGB(255,96,40),TA_LEFT|TA_TOP);
     /* tabs */
     SelectObject(dc,row);

@@ -7,13 +7,21 @@
  *      height != 480 : start 230 rows down (0x47e00 bytes);   width not 640 and not 243 : start 0x1e6 bytes = 243 px (width 397: a postcard beside
  *      the 243 px wide Images\Postcard.RRI) or 0x124 bytes = 146 px (other: the 258x250 Images\Street\*.RRI highlights) to the right.
  *      (0x41E4D5: sub eax,18Dh / cmp eax,1 / sbb / and 0C2h / add 124h -> 0x124 + (w==397 ? 0xC2 : 0).)
- * The file is read through CreateFileA (so the shim's mods folder redirection works), decoded by the shim export RR_DecodeJpeg (Windows Imaging Component; a portable
- * build swaps that for stb_image) and converted to RGB555.  Mod authors can therefore ship any baseline/progressive JPEG as data\mods\Images\NAME.RRI.
+ * The file is read through CreateFileA (so the shim's mods folder redirection works), decoded by the shim export RR_DecodeJpeg (stb_image, the same on every
+ * platform) and converted to RGB555.  Mod authors can therefore ship any baseline/progressive JPEG as data\mods\Images\NAME.RRI.
  */
 #include "../rr.h"
 
 typedef unsigned char *(__stdcall *DecodeFn)(const void *data, unsigned size, int *w, int *h);
 typedef void (__stdcall *FreeFn)(void *p);
+typedef void (__stdcall *LogFn)(const char *s);
+
+/* a line in the shim's log (RR_LOG): why a picture did not load - every failure (the Steam Deck showed black pictures: user, 2026-11-14), the first few loads */
+static void RriLog(HMODULE shim, const char *what, const char *file, unsigned a, unsigned b)
+{   static LogFn lg; static int tried, n; char t[400];
+    if (!tried) { tried = 1; lg = shim ? (LogFn)GetProcAddress(shim, "RR_DbgLog") : NULL; }
+    if (!lg || (what[0] == 'o' && ++n > 3)) return;
+    wsprintfA(t, "RriLoad %s: %.300s (%u %u)", what, file ? file : "?", a, b); lg(t); }
 
 RR_REPLACE_FAST(RriLoad, rr_RriLoad, 12);
 void __fastcall rr_RriLoad(const char *file, int unusedEdx, unsigned short *dest)
@@ -29,22 +37,23 @@ void __fastcall rr_RriLoad(const char *file, int unusedEdx, unsigned short *dest
 
     (void)unusedEdx;
     if (file == NULL) return;
-    shim = GetModuleHandleA("ddraw.dll");
+    shim = GetModuleHandleA("rrddraw.dll");
     decode = shim ? (DecodeFn)GetProcAddress(shim, "RR_DecodeJpeg") : NULL;
     release = shim ? (FreeFn)GetProcAddress(shim, "RR_FreeImage") : NULL;
-    if (!decode || !release) return;
+    if (!decode || !release) { RriLog(shim, "no decoder in the shim", file, shim != NULL, decode != NULL); return; }
 
     h = CreateFileA(file, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    if (h == INVALID_HANDLE_VALUE) return;
+    if (h == INVALID_HANDLE_VALUE) { RriLog(shim, "cannot open", file, GetLastError(), 0); return; }
     size = GetFileSize(h, NULL);
     data = (unsigned char *)LocalAlloc(0, size ? size : 1);
     if (data == NULL) { CloseHandle(h); return; }
-    if (!ReadFile(h, data, size, &got, NULL) || got != size) { LocalFree(data); CloseHandle(h); return; }
+    if (!ReadFile(h, data, size, &got, NULL) || got != size) { RriLog(shim, "cannot read", file, size, got); LocalFree(data); CloseHandle(h); return; }
     CloseHandle(h);
 
     bgr = decode(data, size, &w, &hgt);
     LocalFree(data);
-    if (bgr == NULL) return;
+    if (bgr == NULL) { RriLog(shim, "cannot decode", file, size, 0); return; }
+    RriLog(shim, "ok", file, (unsigned)w, (unsigned)hgt);
 
     base = (unsigned char *)dest;
     if (hgt != 0x1e0) base += 0x47e00;

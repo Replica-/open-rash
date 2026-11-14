@@ -58,7 +58,7 @@ static void SgTitle(const char *file, char *out, int n)
     lstrcpynA(out, stem, n); }
 
 static void SgNext(void)
-{   HMODULE ds = GetModuleHandleA("dsound.dll"); int (__stdcall *play)(const char *, int) = ds ? (int (__stdcall *)(const char *, int))GetProcAddress(ds, "RR_MusicPlay") : NULL;
+{   HMODULE ds = GetModuleHandleA("rrdsound.dll"); int (__stdcall *play)(const char *, int) = ds ? (int (__stdcall *)(const char *, int))GetProcAddress(ds, "RR_MusicPlay") : NULL;
     int k, tries; char path[MAX_PATH + 70];
     if (!play || SgScan() <= 0) return;
     for (tries = 0; tries < 4; tries++) {
@@ -93,7 +93,7 @@ static int SgTickerUp(void);   /* below */
 static volatile LONG g_sgJuke, g_sgBusy;
 /* the game's track number of the song playing now, -1 = none (Restroom "Now Playing" text, src\ui\menu_draw.c) */
 __declspec(dllexport) int __stdcall RR_SongPlaying(void)
-{   HMODULE ds = GetModuleHandleA("dsound.dll"); int (__stdcall *state)(void) = ds ? (int (__stdcall *)(void))GetProcAddress(ds, "RR_MusicState") : NULL;
+{   HMODULE ds = GetModuleHandleA("rrdsound.dll"); int (__stdcall *state)(void) = ds ? (int (__stdcall *)(void))GetProcAddress(ds, "RR_MusicState") : NULL;
     char stem[64], *d; int i;
     if (!g_sgActive || !g_sgCurFile[0] || !state || state() != 2) return -1;
     lstrcpynA(stem, g_sgCurFile, sizeof stem); d = strrchr(stem, '.'); if (d) *d = 0; CharUpperA(stem);
@@ -101,7 +101,7 @@ __declspec(dllexport) int __stdcall RR_SongPlaying(void)
     return -1; }
 __declspec(dllexport) int __stdcall RR_JukeboxSong(int track)
 {   const char *const *names = g_sgTrackName;
-    HMODULE ds = GetModuleHandleA("dsound.dll"); int (__stdcall *play)(const char *, int) = ds ? (int (__stdcall *)(const char *, int))GetProcAddress(ds, "RR_MusicPlay") : NULL;
+    HMODULE ds = GetModuleHandleA("rrdsound.dll"); int (__stdcall *play)(const char *, int) = ds ? (int (__stdcall *)(const char *, int))GetProcAddress(ds, "RR_MusicPlay") : NULL;
     char path[MAX_PATH + 32], file[32]; int ok;
     if (track < 0 || track > 13 || !play || SgScan() <= 0) { LOG("jukebox: track %d not played (no songs folder)", track); return 0; }
     _snprintf(file, sizeof file - 1, "%s.RRA", names[track]); file[sizeof file - 1] = 0;
@@ -116,7 +116,7 @@ __declspec(dllexport) int __stdcall RR_JukeboxSong(int track)
 static DWORD WINAPI SgThread(LPVOID p)
 {   (void)p;
     for (;;) {
-        HMODULE ds = GetModuleHandleA("dsound.dll");
+        HMODULE ds = GetModuleHandleA("rrdsound.dll");
         int (__stdcall *state)(void) = ds ? (int (__stdcall *)(void))GetProcAddress(ds, "RR_MusicState") : NULL;
         int (__stdcall *stop)(void) = ds ? (int (__stdcall *)(void))GetProcAddress(ds, "RR_MusicStop") : NULL;
         int want = SgSongsOn();
@@ -170,8 +170,8 @@ static void SgMakeText(int px)
     if (g_sgTex) { SDL_DestroyTexture(g_sgTex); g_sgTex = NULL; }
     if (!dc) return;
     if (lpx < 8) lpx = 8;
-    ft = CreateFontA(-px, 0, 0, 0, FW_SEMIBOLD, 0, 0, 0, DEFAULT_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, "Bahnschrift");
-    fl = CreateFontA(-lpx, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, "Bahnschrift");
+    ft = CreateFontA(-px, 0, 0, 0, FW_SEMIBOLD, 0, 0, 0, DEFAULT_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, RrFont(RR_FONT_BAHN_SEMI));
+    fl = CreateFontA(-lpx, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, RrFont(RR_FONT_BAHN));
     o = (HFONT)SelectObject(dc, fl); SetTextCharacterExtra(dc, lpx / 2); GetTextExtentPoint32A(dc, lab, (int)strlen(lab), &sl);
     SelectObject(dc, ft); SetTextCharacterExtra(dc, px / 24); GetTextExtentPoint32A(dc, t, (int)strlen(t), &st);
     gap = px / 6; w = (st.cx > sl.cx ? st.cx : sl.cx) + 4 * sh + 8; h = sl.cy + gap + st.cy + 3 * sh + 4;

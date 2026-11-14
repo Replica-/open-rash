@@ -29,11 +29,31 @@ typedef struct DD   { IDirectDraw itf; LONG ref; } DD;
 
 static IDirectDrawVtbl ddvt; static IDirectDrawSurfaceVtbl svt; static IDirectDrawPaletteVtbl pvt;
 static int g_gdi=1; static HWND g_hwnd; static int g_w=640,g_h=480,g_bpp=8; static Surf *g_primary;
+/* a window of the game has the focus: its own window or another of this process (the SDL window it draws into) - on the Steam Deck under Proton / Gamescope the
+   foreground window need not be the main one (user: "on steam deck i couldnt use the native controls"); every focus-gated input checks this */
+static int RrOurFocus(void){ HWND fg=GetForegroundWindow(); DWORD pid=0; if(!g_hwnd) return 0; if(!fg || fg==g_hwnd) return 1; GetWindowThreadProcessId(fg,&pid); return pid==GetCurrentProcessId(); }   /* (no foreground window at all: under Gamescope / Proton that is the normal state - only ever a moment on Windows) */
 static SDL_Window *g_win; static SDL_Renderer *g_ren; static SDL_Texture *g_tex; static int g_headless; static int g_quiet; static char g_dumpGpu[MAX_PATH];   /* g_quiet = RR_HEADLESS=2: off-screen, never takes the focus, but renders through the real SDL (GPU) renderer; RR_DUMP_GPU=<dir> then dumps what the renderer drew */
 static WNDPROC g_origProc, g_sdlProc; static SDL_FRect g_fullRect={0,0,640,480};   /* the whole frame in logical coordinates: with the stretch scaling mode a NULL destination would not be the whole picture */
 static FILE *g_log; static volatile int g_trAll;   /* RR_LOG_PRESENTS: log every surface call for a few race frames */
 #define TR(name,s) do{ static int n_; if(g_log && (g_trAll || ((s)->isPrimary && (n_<12 || n_%100==0)))) fprintf(g_log,"%s #%d surf=%dx%d bpp=%d prim=%d",name,n_,(s)->w,(s)->h,(s)->bpp,(s)->isPrimary), fputc(10,g_log), fflush(g_log); n_++; }while(0)
 #define LOG(...) do{ if(g_log){ fprintf(g_log,"[%lu] ",GetTickCount()); fprintf(g_log,__VA_ARGS__); fputc(10,g_log); fflush(g_log);} }while(0)
+/* the shim's fonts (user, 2026-11-14: the Steam Deck has no Impact / Bahnschrift - "i want this to support steamdeck"): open-licence fonts shipped in the
+   game's fonts folder (data\fonts: Anton for Impact, Arimo - Arial's metrics - for Arial, Barlow Condensed for Bahnschrift; their licences beside them),
+   loaded for this process only (FR_PRIVATE) the first time a font is wanted, from fonts\ in the current folder (the game's data) or beside the exe; the same on
+   every platform.  RrFont(RR_FONT_x) = the family to ask CreateFont for (the original Windows font when the file is missing) */
+enum { RR_FONT_IMPACT, RR_FONT_ARIAL, RR_FONT_BAHN, RR_FONT_BAHN_SEMI, RR_FONT_N };
+static const char *RrFont(int k)
+{   static const char *const file[RR_FONT_N] = { "Anton-Regular.ttf", "Arimo-Regular.ttf", "BarlowCondensed-Medium.ttf", "BarlowCondensed-SemiBold.ttf" };
+    static const char *const fam[RR_FONT_N] = { "Anton", "Arimo", "Barlow Condensed Medium", "Barlow Condensed SemiBold" };
+    static const char *const win[RR_FONT_N] = { "Impact", "Arial", "Bahnschrift", "Bahnschrift" };
+    static int done, ok[RR_FONT_N];
+    if (k < 0 || k >= RR_FONT_N) k = RR_FONT_ARIAL;
+    if (!done) { char dir[2][MAX_PATH], p[MAX_PATH], *sl; int d, i; done = 1;
+        strcpy(dir[0], "fonts"); GetModuleFileNameA(NULL, dir[1], MAX_PATH); sl = strrchr(dir[1], 0x5C); if (sl) strcpy(sl, "\\fonts"); else strcpy(dir[1], "fonts");
+        for (i = 0; i < RR_FONT_N; i++) for (d = 0; d < 2 && !ok[i]; d++) { _snprintf(p, sizeof p - 1, "%s\\%s", dir[d], file[i]); p[sizeof p - 1] = 0; ok[i] = AddFontResourceExA(p, FR_PRIVATE, 0) > 0; }
+        if (ok[RR_FONT_ARIAL]) for (d = 0; d < 2; d++) { _snprintf(p, sizeof p - 1, "%s\\Arimo-Bold.ttf", dir[d]); p[sizeof p - 1] = 0; if (AddFontResourceExA(p, FR_PRIVATE, 0) > 0) break; }   /* (Arimo's bold: FW_BOLD) */
+        LOG("fonts: Anton %d, Arimo %d, Barlow Condensed %d / %d (0 = the Windows font instead)", ok[0], ok[1], ok[2], ok[3]); }
+    return ok[k] ? fam[k] : win[k]; }
 static volatile int *g_modePtr=(volatile int*)0x47a660;   /* address of the game-mode variable; the relinked exe tells us the real one (RR_SetModePtr) */
 __declspec(dllexport) void __stdcall RR_SetModePtr(volatile int *p){ g_modePtr=p; }
 static volatile int *g_framePtr;   /* the game's own frame counter (g_frameCounter: game frames run), set by the converted main loop */
@@ -86,7 +106,7 @@ static DWORD WINAPI PostThread(LPVOID p)
 {   unsigned long pn=0, pending=0; int ended=0; char path[MAX_PATH+16]; (void)p; timeBeginPeriod(1);
     for(;;){ Sleep(10);
         if(!(g_raceFrame0 && g_raceN>=100 && g_lastSceneTick && (int)(GetTickCount()-g_lastSceneTick)>400)){ pn=0; pending=0; ended=0; continue; }
-        if(!ended){ ended=1; { HMODULE ds=GetModuleHandleA("dsound.dll"); void (__stdcall *rt)(void)=ds?(void(__stdcall*)(void))GetProcAddress(ds,"RR_SndRealtime"):0; if(rt) rt(); } LOG("end of race: post-race ticks start"); }
+        if(!ended){ ended=1; { HMODULE ds=GetModuleHandleA("rrdsound.dll"); void (__stdcall *rt)(void)=ds?(void(__stdcall*)(void))GetProcAddress(ds,"RR_SndRealtime"):0; if(rt) rt(); } LOG("end of race: post-race ticks start"); }
         pn++;
         if(PostTick(pn) && g_dumpDir[0]) pending=pn;                       /* a dump is due ... */
         AcquireSRWLockShared(&g_surfLk); if(pending && g_lastShown && !SurfBlank(g_lastShown)){ sprintf(path,"%s/post%06lu.bmp",g_dumpDir,pending); DumpBmp(g_lastShown,path); pending=0; } ReleaseSRWLockShared(&g_surfLk);   /* ... and is taken as soon as something is on the screen (a fade/load shows black) */
@@ -128,7 +148,7 @@ static DWORD WINAPI ShotOpen(LPVOID p)
 {   char *path=(char*)p; ShellExecuteA(NULL,"open",path,NULL,NULL,SW_SHOWNOACTIVATE); Sleep(700); if(g_hwnd) SetForegroundWindow(g_hwnd); free(path); return 0; }
 static void ShotKey(void)
 {   static int was, dirDone; static char dir[MAX_PATH]; int down; DWORD *px; int w=g_w,h=g_h; SDL_Surface *s; char path[MAX_PATH+64]; SYSTEMTIME t;
-    if(g_headless || getenv("RR_SCRIPT") || !g_hwnd || GetForegroundWindow()!=g_hwnd) { was=0; return; }
+    if(g_headless || getenv("RR_SCRIPT") || !RrOurFocus()) { was=0; return; }
     down=(GetAsyncKeyState('P')&0x8000)!=0; if(!down || was){ was=down; return; } was=1;
     if(!dirDone){ char *e=getenv("RR_SHOT_DIR"); strncpy(dir,(e&&*e)?e:"screenshots",MAX_PATH-1); CreateDirectoryA(dir,NULL); dirDone=1; }
     SDL_GetCurrentRenderOutputSize(g_ren,&w,&h);
@@ -174,7 +194,7 @@ static void QuitAll(void)
     ExitProcess(0); }
 static void SpeedKey(void)
 {   static int wu, wd; int u, d, n=(int)(sizeof g_speedSteps/sizeof g_speedSteps[0]);
-    if(!SpeedOn() || !g_hwnd || GetForegroundWindow()!=g_hwnd){ wu=wd=0; return; }
+    if(!SpeedOn() || !RrOurFocus()){ wu=wd=0; return; }
     if(GetAsyncKeyState('Q')&0x8000) QuitAll();
     SpeedInit(); u=(GetAsyncKeyState(VK_UP)&0x8000)!=0; d=(GetAsyncKeyState(VK_DOWN)&0x8000)!=0;
     if(u && !wu && g_speedIdx<n-1){ g_speedIdx++; LOG("demo speed %d%%",g_speedSteps[g_speedIdx]); }
@@ -204,7 +224,7 @@ static void Present(Surf *s)
     { int scene=g_sceneFlag; g_sceneThis=scene; if (g_detOn && !g_raceFrame0 && scene) { g_raceFrame0=g_frame; g_raceN=0; g_gf0=g_framePtr?*g_framePtr:0; g_gfLast=g_gf0-1; LOG("DET: race frame 0 = present #%lu (first 3D scene, game frame %d)",g_frame,g_gf0); MmKillMenuTimer(); }
       else if (g_raceFrame0 && scene) { /* race clock = the game's own frame counter: a scene drawn twice for the same game frame (repaint) is ignored */ int gf=g_framePtr?*g_framePtr:(int)(g_raceN+1+g_gf0); if (gf==g_gfLast) g_sceneThis=0; else { g_gfLast=gf; g_raceN=(unsigned long)(gf-g_gf0); } } }
     g_sceneFlag=0;
-    if (g_detOn && g_raceFrame0 && g_sceneThis) { static void (__stdcall *sndStep)(void); static int looked; if(!looked){ HMODULE ds=GetModuleHandleA("dsound.dll"); sndStep=ds?(void(__stdcall*)(void))GetProcAddress(ds,"RR_SndStep"):0; looked=1; } if(sndStep) sndStep(); }   /* deterministic audio clock: see rrdsound.c */
+    if (g_detOn && g_raceFrame0 && g_sceneThis) { static void (__stdcall *sndStep)(void); static int looked; if(!looked){ HMODULE ds=GetModuleHandleA("rrdsound.dll"); sndStep=ds?(void(__stdcall*)(void))GetProcAddress(ds,"RR_SndStep"):0; looked=1; } if(sndStep) sndStep(); }   /* deterministic audio clock: see rrdsound.c */
     SdTestHook(); MbTestHook(); IcTestHook(); VcTestHook(); McTestHook(); VpTestHook();
     if (g_raceFrame0 && g_sceneThis) FrameHashLog(s);
     if (g_raceFrame0 && g_sceneThis && RaceTick(g_raceN) && g_dumpDir[0]) { sprintf(path,"%s/race%06lu.bmp",g_dumpDir,g_raceN); DumpBmp(s,path); gpuDump=1; }

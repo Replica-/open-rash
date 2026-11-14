@@ -73,7 +73,7 @@ RR_REPLACE(SoundMix, rr_SoundMix);
 int __cdecl rr_SoundMix(void)
 {
     RRSoundMix cur, old;
-    HMODULE shim = GetModuleHandleA("ddraw.dll");
+    HMODULE shim = GetModuleHandleA("rrddraw.dll");
     ShimSoundMix screen = shim ? (ShimSoundMix)GetProcAddress(shim, "RR_SoundMix") : 0;
     HWND prevFocus = GetFocus();
     int i, done;

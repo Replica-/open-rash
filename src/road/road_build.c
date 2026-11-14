@@ -1089,7 +1089,7 @@ static void ShadowEnd(void)
     rr_shadowGen = 0;
     if (rr_shadowAllocs) {   /* the game's bump allocator keeps its pointer in .rrd: an allocation made here could be handed out again - report it */
         static int told;
-        if (!told) { HMODULE sh = GetModuleHandleA("ddraw.dll"); void (__stdcall *dl)(const char *) = sh ? (void (__stdcall *)(const char *))GetProcAddress(sh, "RR_DbgLog") : 0; told = 1; if (dl) dl("road ring: ALLOCATION during shadow generation"); }
+        if (!told) { HMODULE sh = GetModuleHandleA("rrddraw.dll"); void (__stdcall *dl)(const char *) = sh ? (void (__stdcall *)(const char *))GetProcAddress(sh, "RR_DbgLog") : 0; told = 1; if (dl) dl("road ring: ALLOCATION during shadow generation"); }
     }
 }
 /* ---- course map (Video Options > Course map, GPU races) ----
@@ -1156,7 +1156,7 @@ static void OneRoadScan(int *course, unsigned back)
     g_orScan = 0;
     rr_ring = saveRing; rr_ringN = saveN;
     ShadowEnd();
-    {   HMODULE sh = GetModuleHandleA("ddraw.dll"); void (__stdcall *dl)(const char *) = sh ? (void (__stdcall *)(const char *))GetProcAddress(sh, "RR_DbgLog") : 0;
+    {   HMODULE sh = GetModuleHandleA("rrddraw.dll"); void (__stdcall *dl)(const char *) = sh ? (void (__stdcall *)(const char *))GetProcAddress(sh, "RR_DbgLog") : 0;
         char m[96]; int i;
         if (dl) { wsprintfA(m, "one road (True 3D, no forks): %d split(s) in the course", g_orN); dl(m); }
         for (i = 0; dl && i < g_orN; i++) { wsprintfA(m, "one road: split %d..%d, A right edge %d -> %d", g_orSplit[i].fork >> 8, g_orSplit[i].join >> 8, g_orSplit[i].w[0][0], g_orSplit[i].w[1][0]); dl(m); } }
@@ -1313,7 +1313,7 @@ static void CourseExtract(int *course, int start)
 static void CourseMapBuild(int *course, int start)
 {
     extern int rr_gpuRace;
-    HMODULE sh = GetModuleHandleA("ddraw.dll");
+    HMODULE sh = GetModuleHandleA("rrddraw.dll");
     int (__stdcall *want)(void) = sh ? (int (__stdcall *)(void))GetProcAddress(sh, "RR_CourseMapOn") : 0;
     void (__stdcall *give)(const RrCourseMap *) = sh ? (void (__stdcall *)(const RrCourseMap *))GetProcAddress(sh, "RR_GpuCourse") : 0;
     unsigned *saveRing = rr_ring; int saveN = rr_ringN, split = 0;

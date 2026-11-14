@@ -65,7 +65,7 @@ static int CourseFile(char *path, int track, int level)
     } else code = 0x10000 | GetLastError();
     HeapFree(GetProcessHeap(), 0, env);
     DeleteFileA(cfg);
-    {   char m[MAX_PATH * 2 + 64]; HMODULE sh = GetModuleHandleA("ddraw.dll"); DWORD moved = 0, err = 0;
+    {   char m[MAX_PATH * 2 + 64]; HMODULE sh = GetModuleHandleA("rrddraw.dll"); DWORD moved = 0, err = 0;
         void (__stdcall *dl)(const char *) = sh ? (void (__stdcall *)(const char *))GetProcAddress(sh, "RR_DbgLog") : 0;
         lstrcatA(tmp, ".live"); DeleteFileA(tmp); tmp[lstrlenA(tmp) - 5] = 0;   /* the extractor's check file */
         if (code == 0) {   /* a fresh file can be held a moment longer (virus scanner: access denied): retry, then copy.  (Another game may have made it meanwhile.) */
@@ -82,7 +82,7 @@ static int CourseFile(char *path, int track, int level)
 /* race start (end of the road ring set-up rr_RoadRingBuild, GPU races): hand the course to the shim */
 void rr_World3DRaceStart(void)
 {
-    HMODULE sh = GetModuleHandleA("ddraw.dll");
+    HMODULE sh = GetModuleHandleA("rrddraw.dll");
     int (__stdcall *want)(void) = sh ? (int (__stdcall *)(void))GetProcAddress(sh, "RR_World3DWanted") : 0;
     int (__stdcall *load)(const char *, const RrWorld3DLive *) = sh ? (int (__stdcall *)(const char *, const RrWorld3DLive *))GetProcAddress(sh, "RR_World3DLoad") : 0;
     static RrWorld3DLive live;
@@ -127,7 +127,7 @@ void rr_World3DFrame(void)
     {   static int on = -1; static unsigned n; char e[8];   /* test switch RR_W3LOGW=1: the live ring's wall words (+0x14c..+0x160) of the 16 pieces from the view, every 150 frames */
         if (on < 0) on = GetEnvironmentVariableA("RR_W3LOGW", e, sizeof e) > 0;
         if (on && (++n % 150) == 0) {
-            HMODULE sh = GetModuleHandleA("ddraw.dll"); void (__stdcall *dl)(const char *) = sh ? (void (__stdcall *)(const char *))GetProcAddress(sh, "RR_DbgLog") : 0;
+            HMODULE sh = GetModuleHandleA("rrddraw.dll"); void (__stdcall *dl)(const char *) = sh ? (void (__stdcall *)(const char *))GetProcAddress(sh, "RR_DbgLog") : 0;
             char m[160]; int i;
             for (i = 0; dl && i < 16; i++) {
                 unsigned pos = (unsigned)rec_stepSaved.g_camRoadPos + (unsigned)i * 0x100; const int *sec = (const int *)RR_RING(pos)[3];

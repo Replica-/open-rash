@@ -125,7 +125,8 @@ static int R3_Texture(R3 *r, const unsigned *rgba, int w, int h)
 
 static int R3_Init(R3 *r, ID3D11Device *dev)
 {
-    HMODULE dc = LoadLibraryA("d3dcompiler_47.dll");
+    HMODULE dc = LoadLibraryA("rr_d3dcompiler_47.dll");   /* the release's own copy of Windows' compiler under a name Wine / Proton has no built-in of (the Steam */
+    if (!dc) dc = LoadLibraryA("d3dcompiler_47.dll");     /* Deck: no DLL override needed); else the system's */
     R3Compile cc = dc ? (R3Compile)GetProcAddress(dc, "D3DCompile") : NULL;
     ID3DBlob *vsb, *psb;
     D3D11_INPUT_ELEMENT_DESC ie[5] = {

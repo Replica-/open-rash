@@ -372,7 +372,7 @@ static void ObjLog(const int *t)
     for (i = 0; i < n; i++) if (seen[i][0] == (unsigned)t[0xdc / 4] && seen[i][1] == *(unsigned char *)((char *)t + 0xc0)) return;
     if (n == 64) return;
     seen[n][0] = (unsigned)t[0xdc / 4]; seen[n][1] = *(unsigned char *)((char *)t + 0xc0); n++;
-    dl = (void (__stdcall *)(const char *))GetProcAddress(GetModuleHandleA("ddraw.dll"), "RR_DbgLog");
+    dl = (void (__stdcall *)(const char *))GetProcAddress(GetModuleHandleA("rrddraw.dll"), "RR_DbgLog");
     if (!dl) return;
     k = wsprintfA(b, "obj hook %08x (base %08x) type %d:", (unsigned)t[0xdc / 4], (unsigned)GetModuleHandleA(NULL), *(unsigned char *)((char *)t + 0xc0));
     for (i = 0; i < 0x40 && k < 380; i++) k += wsprintfA(b + k, " %x", (unsigned)t[i]);

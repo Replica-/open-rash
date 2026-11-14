@@ -121,7 +121,7 @@ static int StartMenu(void)
 /* tells the test shim (step driver) that the menu message loop runs: a menu screen is up and keys reach it (no static data: the state hash must not change) */
 static void MenuLoopNote(int on)
 {
-    HMODULE sh = GetModuleHandleA("ddraw.dll");
+    HMODULE sh = GetModuleHandleA("rrddraw.dll");
     void (__stdcall *f)(int) = sh ? (void (__stdcall *)(int))GetProcAddress(sh, "RR_MenuLoop") : 0;
     if (f) f(on);
 }

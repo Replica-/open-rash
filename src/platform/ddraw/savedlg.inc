@@ -17,7 +17,7 @@ typedef struct SdEntry { char name[48]; int valid; unsigned char chr, level, won
 
 static void IcBox(HDC dc,int x,int y,int w,int h,COLORREF fill,COLORREF frame,int r);   /* inputcfg.inc */
 static void IcText(HDC dc,int x,int y,const char *t,COLORREF c,UINT al);
-__declspec(dllexport) unsigned char * __stdcall RR_DecodeJpeg(const void *data, unsigned size, int *w, int *h);   /* wicjpeg.c */
+__declspec(dllexport) unsigned char * __stdcall RR_DecodeJpeg(const void *data, unsigned size, int *w, int *h);   /* jpeg.c */
 __declspec(dllexport) void __stdcall RR_FreeImage(void *p);
 
 /* the riders (character 1..8: the game's picture names Chars/<name>-N, rr_PlayerTitleName string table 0x20..0x27) and the bikes (pit message table, rr_CommentaryText) */
@@ -147,9 +147,9 @@ static void SdDraw(Surf *tmp,const Surf *base,const SdState *s,DWORD now)
 {   HDC dc; HFONT title,fBig,fRow,fSm,fMid,old; int t, pass, nt=SdTiles(s);
     memcpy(tmp->bits,base->bits,(size_t)tmp->pitch*tmp->h); SdDarken(tmp,0,0,tmp->w,tmp->h); SdDarken(tmp,8,8,632,472);
     S_GetDC(&tmp->itf,&dc); SetBkMode(dc,TRANSPARENT);
-    title=CreateFontA(44,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Impact"); fBig=CreateFontA(64,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Impact");
-    fRow=CreateFontA(20,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Impact");
-    fSm=CreateFontA(13,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Arial"); fMid=CreateFontA(15,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,"Arial");
+    title=CreateFontA(44,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_IMPACT)); fBig=CreateFontA(64,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_IMPACT));
+    fRow=CreateFontA(20,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_IMPACT));
+    fSm=CreateFontA(13,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_ARIAL)); fMid=CreateFontA(15,0,0,0,FW_BOLD,0,0,0,DEFAULT_CHARSET,0,0,ANTIALIASED_QUALITY,0,RrFont(RR_FONT_ARIAL));
     old=(HFONT)SelectObject(dc,title); IcText(dc,18,8,s->saving?"Save Game":"Load Game",RGB(255,96,40),TA_LEFT|TA_TOP);
     SelectObject(dc,fSm); { char c[48]; _snprintf(c,sizeof c,"%d saved game%s",s->n,s->n==1?"":"s"); c[sizeof c-1]=0; IcText(dc,622,30,c,RGB(150,150,175),TA_RIGHT|TA_TOP); }
     for(pass=0;pass<3;pass++){   /* panels, then the pictures (straight into the surface), then the text over them */

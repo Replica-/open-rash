@@ -246,7 +246,7 @@ static void hud_wide(int end)
     static void (__stdcall *finish)(int *, int, int);
     static int looked;
     if (!looked) {
-        HMODULE m = GetModuleHandleA("ddraw.dll");
+        HMODULE m = GetModuleHandleA("rrddraw.dll");
         looked = 1;
         if (m) {
             begin = (void (__stdcall *)(int *, int))GetProcAddress(m, "RR_HudBegin");

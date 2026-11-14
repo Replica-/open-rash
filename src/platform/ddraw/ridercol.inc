@@ -186,8 +186,8 @@ static void RcDraw(Surf *tmp, const Surf *base, int sel, int pc)
     static const int spr[4] = { 89, 197, 297, 292 };   /* (292: walking towards the camera) */
     memcpy(tmp->bits, base->bits, (size_t)tmp->pitch * tmp->h); SdDarken(tmp, 0, 0, tmp->w, tmp->h); SdDarken(tmp, 8, 8, 632, 472);
     S_GetDC(&tmp->itf, &dc); SetBkMode(dc, TRANSPARENT);
-    title = CreateFontA(44, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, "Impact"); rowf = CreateFontA(22, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, "Impact");
-    fSm = CreateFontA(13, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, "Arial"); fMid = CreateFontA(15, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, "Arial");
+    title = CreateFontA(44, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, RrFont(RR_FONT_IMPACT)); rowf = CreateFontA(22, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, RrFont(RR_FONT_IMPACT));
+    fSm = CreateFontA(13, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, RrFont(RR_FONT_ARIAL)); fMid = CreateFontA(15, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, 0, 0, ANTIALIASED_QUALITY, 0, RrFont(RR_FONT_ARIAL));
     old = (HFONT)SelectObject(dc, title); IcText(dc, 18, 8, "Rider Colours", RGB(255, 96, 40), TA_LEFT | TA_TOP);
     if (g_rcTab) RcLut(row, cur);
     for (i = 0; i < RC_ROWS; i++) { int y = RcRowY(i), on = i == sel; COLORREF c = on ? (pc >= 0 ? RGB(255, 200, 120) : RGB(255, 235, 80)) : RGB(235, 235, 240);

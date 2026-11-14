@@ -136,7 +136,7 @@ void __cdecl rr_RaceSetup(void)
     (&g_cheatSpeed)[0] = 0; (&g_cheatSpeed)[1] = 0; (&g_cheatSpeed)[2] = 0; (&g_cheatSpeed)[3] = 0;
     TrackResourcesLoad();
     {   /* Video Options > Race view: the shim widens the frame for "Widescreen" (returns its width, 0 = normal 640); the projection centre / culling limit g_projWidth is the frame width in half-pixels (hi-res frames only) */
-        int (__stdcall *rb)(void) = g_hiResRace ? (int (__stdcall *)(void))GetProcAddress(GetModuleHandleA("ddraw.dll"), "RR_RaceBegin") : 0;
+        int (__stdcall *rb)(void) = g_hiResRace ? (int (__stdcall *)(void))GetProcAddress(GetModuleHandleA("rrddraw.dll"), "RR_RaceBegin") : 0;
         int ws = rb ? rb() : 0;
         rec_Controls.g_screenMidX = rec_Controls.g_projWidth = ws ? ws / 2 : 320;
         rr_GpuRaceBegin();   /* Video Options > Renderer = GPU: the world is drawn by the shim's GPU renderer (src\render\gpu_scene.c) */
