@@ -6,6 +6,15 @@ $Build = "$Root\analysis\build"
 $Src   = "$Root\src"
 $VsBuildTools = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools"
 $WinSdkLib    = "C:\Program Files (x86)\Windows Kits\10\Lib\10.0.26100.0\um\x86"
+# Elsewhere (e.g. a GitHub runner with Visual Studio Enterprise): the newest Visual Studio with the C++ x86 tools, the newest Windows 10/11 SDK
+if (-not (Test-Path "$VsBuildTools\VC\Auxiliary\Build\vcvarsall.bat")) {
+    $vswhere = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
+    if (Test-Path $vswhere) { $VsBuildTools = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath }
+}
+if (-not (Test-Path "$WinSdkLib\kernel32.lib")) {
+    $WinSdkLib = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\Lib\*\um\x86\kernel32.lib" -ErrorAction SilentlyContinue |
+        Sort-Object { [version]$_.Directory.Parent.Parent.Name } | Select-Object -Last 1 | ForEach-Object { $_.DirectoryName }
+}
 
 function Get-RrSdl {
     foreach ($d in $env:RR_SDL_DIR, "$Root\deps\SDL3-3.4.20", "$Root\analysis\sdl_dl\x3\SDL3-3.4.20") {

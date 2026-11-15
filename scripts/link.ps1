@@ -2,7 +2,7 @@
 # Output: analysis\build\OpenRash.exe (+ .map, .pdb).
 . "$PSScriptRoot\common.ps1"
 Enter-RrVcVars
-$vc = (Resolve-Path "$VsBuildTools\VC\Tools\MSVC\*\bin\Hostx64\x86").Path
+$vc = (Resolve-Path "$VsBuildTools\VC\Tools\MSVC\*\bin\Hostx64\x86" | Select-Object -Last 1).Path
 $libs = "kernel32","user32","gdi32","advapi32","comctl32","winmm","wsock32","msacm32","tapi32" | ForEach-Object { "$WinSdkLib\$_.lib" }
 # DirectDrawCreate / DirectSoundCreate from OUR shims, rrddraw.dll / rrdsound.dll: names with no built-in copy in Windows or Wine / Proton, so the game
 # always loads them - no DLL override (the Steam Deck had silently used Wine's own ddraw.dll).  Their import libraries are the ones the shim builds write

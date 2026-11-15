@@ -1,0 +1,76 @@
+# Build OpenRash.exe + rrddraw.dll, rrdsound.dll, SDL3.dll on every push / pull request (artifact: OpenRash-<commit>).
+# Push a tag v* (e.g. git tag v1.0 && git push origin v1.0) to also publish a GitHub release with the zip.
+# The build needs no game files; players supply their own copy of the game's data (see readme.md).
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  SDL_VERSION: 3.4.20
+  SDL_SHA256: 1ec3009655ee37b1f73e52b3b120acc5afd8abaf9532f3303b1bf1dfe91b5969
+
+jobs:
+  build:
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache SDL3
+        id: sdl-cache
+        uses: actions/cache@v4
+        with:
+          path: deps
+          key: sdl3-${{ env.SDL_VERSION }}-vc
+
+      - name: Download SDL3
+        if: steps.sdl-cache.outputs.cache-hit != 'true'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $zip = "$env:RUNNER_TEMP\sdl3.zip"
+          Invoke-WebRequest "https://github.com/libsdl-org/SDL/releases/download/release-$env:SDL_VERSION/SDL3-devel-$env:SDL_VERSION-VC.zip" -OutFile $zip
+          $hash = (Get-FileHash $zip -Algorithm SHA256).Hash
+          if ($hash -ne $env:SDL_SHA256) { throw "SDL3 zip checksum mismatch: $hash" }
+          Expand-Archive $zip -DestinationPath deps -Force
+
+      - name: Build
+        run: |
+          scripts\build_quick.ps1
+          foreach ($f in "analysis\build\OpenRash.exe", "analysis\build\sdl\rrddraw.dll", "analysis\build\sdl\rrdsound.dll", "analysis\build\sdl\SDL3.dll") {
+            if (-not (Test-Path $f)) { Write-Error "missing build output: $f"; exit 1 }
+          }
+
+      - name: Package
+        id: package
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $name = if ($env:GITHUB_REF_TYPE -eq 'tag') { "OpenRash-$env:GITHUB_REF_NAME" } else { "OpenRash-$($env:GITHUB_SHA.Substring(0,7))" }
+          $dir = "release\$name"
+          New-Item -ItemType Directory -Force $dir | Out-Null
+          Copy-Item analysis\build\OpenRash.exe, analysis\build\sdl\rrddraw.dll, analysis\build\sdl\rrdsound.dll, analysis\build\sdl\SDL3.dll, readme.md, LICENSE $dir
+          Compress-Archive "$dir\*" "release\$name.zip" -Force
+          Copy-Item analysis\build\OpenRash.pdb "release\$name.pdb"
+          [IO.File]::AppendAllText($env:GITHUB_OUTPUT, "name=$name`n")
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package.outputs.name }}
+          path: release/${{ steps.package.outputs.name }}/
+
+      - name: Publish release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$env:GITHUB_REF_NAME" "release\${{ steps.package.outputs.name }}.zip" "release\${{ steps.package.outputs.name }}.pdb" --title "Open Rash $env:GITHUB_REF_NAME" --generate-notes
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }

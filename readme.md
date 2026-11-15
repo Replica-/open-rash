@@ -90,9 +90,13 @@ The **Jukebox** plays any song on request, and the music videos play again (both
 
 ## Building
 Prerequisites:
-- Visual Studio 2022 Build Tools with the C++ x86 compiler, and the Windows 11 SDK (10.0.26100). Both install paths are set at the top of `scripts\common.ps1`.
+- Visual Studio 2022 Build Tools with the C++ x86 compiler, and the Windows 11 SDK (10.0.26100). Both install paths are set at the top of `scripts\common.ps1`;
+  if they are not there, the newest Visual Studio with the C++ x86 tools and the newest Windows SDK are used.
 - SDL 3.4.20: unpack `SDL3-devel-3.4.20-VC.zip` from the [SDL releases](https://github.com/libsdl-org/SDL/releases) into `deps\`
   (so that `deps\SDL3-3.4.20\include` exists), or point `RR_SDL_DIR` at it.
+
+GitHub Actions (`.github/workflows/build.yml`) builds every push and keeps the exe and DLLs as a workflow artifact;
+pushing a tag `v*` (`git tag v1.0; git push origin v1.0`) also publishes a GitHub release with the zip.
 
 Then, in PowerShell from the repository folder:
 
