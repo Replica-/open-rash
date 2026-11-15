@@ -1,12 +1,18 @@
 # Open Rash
 
-> **Please note:** this project is provided as is, and I'm unlikely to fix reported issues. You're welcome to fork it and make your own fixes. Some problems turned out to be hard to fix: the textures wobble with the original renderer's draw-distance
-> handling, and fixing that properly would mean rebuilding the 3D world from scratch, which brings its own set of challenges.
-> My own plans will probably continue in a fork focused on the True 3D mode, better upscaled art, a day / night cycle, weather effects and more.
+> **Please note:** this project is provided as is, and I'm unlikely to fix reported issues, but you're welcome to fork it and make your own fixes.
+> Some problems turned out to be hard to fix in this version:
+> - Textures wobble, because of the way the original renderer handles draw distance.
+> - The draw distance doesn't handle the splits in the road: the road geometry doesn't actually line up where a split joins back into a single road.
 >
-> The widescreen art mod (the menu side strips and upscaled sprites, textures and skies) is not included yet; I'll work out how to share it later.
+> My work now continues in **[Open Rash Next](https://github.com/Replica-/open-rash-next)**, an enhanced fork with a major graphical overhaul.
+> Its art assets will be published there.
+>
+> The widescreen art (menu side panels and upscaled sprites, textures and skies) is **not supplied** with this version.
+> You can regenerate it yourself with [Fooocus](https://github.com/lllyasviel/Fooocus) (see [How the widescreen art mod was made](#how-the-widescreen-art-mod-was-made)).
 
-Open Rash does not include the game's content (graphics, sounds, music, videos, courses). You need your own copy of *Road Rash* for Windows 95;
+Open Rash does not include the game's content (graphics, sounds, music, videos, courses): you need your own copy of *Road Rash* for Windows 95.
+Ready-built downloads are on the [Releases](https://github.com/Replica-/open-rash/releases) page.
 
 ![Widescreen race in the Sierra Nevada, upscaled art](docs/screenshots/race_sierra_widescreen.jpg)
 
@@ -36,7 +42,7 @@ The same moment of a City race in both renderers: the software picture (left) an
 
 ### Widescreen menus
 With Menu scaling set to *Widescreen*, the menu and story pictures fill a 16:9 window: each picture gets painted side panels that continue its scene,
-instead of black bars. The artwork is an optional mod, distributed separately: copy its `widescreen` folder into a `mod` folder next to `OpenRash.exe`
+instead of black bars. The artwork is an optional mod that is not supplied with this version (you can regenerate it, see [How the widescreen art mod was made](#how-the-widescreen-art-mod-was-made)): copy its `widescreen` folder into a `mod` folder next to `OpenRash.exe`
 (`mod\widescreen\`). It also holds the slightly upscaled sprites, textures and skies. Without it, the menus keep black bars and the original art is used.
 
 ![Widescreen Game Mode screen](docs/screenshots/widescreen_gamemode.jpg)
